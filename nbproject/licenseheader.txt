@@ -1,0 +1,7 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}(C) 2016 Tomas Kraus
+<#if licenseLast??>
+${licenseLast}
+</#if>
