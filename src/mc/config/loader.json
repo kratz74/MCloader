@@ -1,4 +1,17 @@
 {
+    "JavaOptions" : [
+        { "name" : "Xdock:icon", "value" : "<path>/assets/packs/ghostminepack/icon.png" },
+        { "name" : "Xdock:name", "value" : "Carovny Minecraft 1.6.4" },
+        { "name" : "Xmx2000m",   "value" : null }
+    ],
+
+    "Properties" : [
+        { "name" : "java.library.path", "value" : "<path>/lib/native" },
+        { "name" : "fml.core.libraries.mirror", "value" : "http://mirror.technicpack.net/Technic/lib/fml/%s" },
+        { "name" : "minecraft.applet.TargetDirectory", "value" : "<path>/cm164" },
+        { "name" : "java.net.preferIPv4Stack", "value" : "true" }
+    ],
+
     "ClassPath" : [
         "lib/modpack.jar",
         "lib/launchwrapper-1.8.jar",
@@ -24,6 +37,21 @@
         "lib/lwjgl_util-2.9.3.jar",
         "lib/minecraft.jar"
     ],
+
+    "Class" : "net.minecraft.launchwrapper.Launch",
+
+    "Arguments" : {
+        "username" : "<userName>",
+        "session" : "token:3f7c52dd20d0459c9d7187d41f93c4e4:f90d0677ebbf4283b5a82922d93fd9e1",
+        "version" : "1.6.4-Forge9.11.1.965",
+        "gameDir" : "<path>/cm164",
+        "assetsDir" : "<path>/assets/virtual/legacy",
+        "tweakClass" : "cpw.mods.fml.common.launcher.FMLTweaker",
+        "title" : "Carovny Minecraft 1.6.4",
+        "width" : "1440",
+        "height" : "900",
+        "icon" : "<path>/assets/packs/carovnyminecraft-reloaded/icon.png"
+    },
 
     "Mods" : [
         { "file" : "codechickencore-0.9.0.7.jar",

@@ -37,7 +37,8 @@ public class Main {
         uiCtx.waitForUi();
         LoaderInit.persist("/data/archive/CMloader/src/mc/init", init);
         System.out.println("ENDING");
-
+        if (true)
+            return;
         String path = init.getPath();
         Arguments arguments = new Arguments(
                 init.getUserName(),
