@@ -9,27 +9,31 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import mc.log.LogLevel;
+import mc.log.Logger;
 
 /**
  * JSON writer.
  */
 public class InitWriter implements Closeable {
     
-    /** JSON parser factory. */
-    private static JsonFactory factory = new JsonFactory();
+    /** Logger. */
+    private static final Logger LOG = Logger.getInstance();
 
+    /** JSON parser factory. */
+    private static final JsonFactory FACTORY = new JsonFactory();
+
+    /**
+     * Writes loader initialization file.
+     * @param file Target loader initialization file.
+     * @param data Initialization file content.
+     */
     public static void write(final String file, final LoaderInit data) {
-        System.out.println("Writting " + file);
-        InitWriter w = null;
-	try {
-	    w = new InitWriter(new File(file), data);
+        LOG.log(LogLevel.FINE, "Writing initialization file: %s", file);
+	try (InitWriter w = new InitWriter(new File(file), data)) {
 	    w.write();
 	} catch (IOException ioe) {
-	    ioe.printStackTrace();
-	} finally {
-	    if (w != null) {
-		w.close();
-	    }
+	    LOG.log(LogLevel.WARNING, "Error writing initialization file: %s", ioe);
 	}        
     }
 
@@ -47,11 +51,12 @@ public class InitWriter implements Closeable {
      */
     public InitWriter(final File file, final LoaderInit data) throws IOException {
         this.data = data;
-        generator = factory.createGenerator(file, JsonEncoding.UTF8);
+        generator = FACTORY.createGenerator(file, JsonEncoding.UTF8);
     }
 
     /**
-     * Write 
+     * Write JSON file content.
+     * @throws java.io.IOException
      */
     public void write() throws IOException {
         generator.writeStartObject();
@@ -77,7 +82,7 @@ public class InitWriter implements Closeable {
 	try {
             generator.close();
 	} catch (IOException ioe) {
-	    ioe.printStackTrace();
+	    LOG.log(LogLevel.WARNING, "Error closing initialization file: %s", ioe);
 	}
     }
 }

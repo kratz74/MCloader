@@ -14,7 +14,8 @@ public class LoaderConfig {
      * Mod configuration element.
      */
     public static class Mod {
-	/** Mod file name. */
+
+        /** Mod file name. */
 	private final String file;
 
 	/** Mod download URL. */
@@ -45,82 +46,6 @@ public class LoaderConfig {
 	public String getUrl() {
 	    return url;
 	}
-    }
-
-    /**
-     * Java option and/or property configuration element.
-     */
-    public static class Property {
-
-        /** Option/property name. */
-        private final String name;
-
-        /** Option/property value. */
-        private final String value;
- 	/**
-	 * Creates an instance of option and/or property configuration element.
-	 * @param name  Option/property name.
-	 * @param value Option/property value.
-	 */
-	Property(final String name, final String value) {
-	    this.name = name;
-	    this.value = value;
-	}
-   
-	/**
-	 * Get option/property name.
-	 * @return Option/property name.
-	 */
-	public String getName() {
-	    return name;
-	}
-
-	/**
-	 * Get option/property value.
-	 * @return Option/property value.
-	 */
-	public String getValue() {
-	    return value;
-	}
-
-    }
-
-    /**
-     * Main class startup argument configuration element.
-     */
-    public static class Argument {
-
-        /** Startup argument name. */
-        private final String name;
-
-        /** Startup argument value. */
-        private final String value;
- 	/**
-	 * Creates an instance of Main class startup argument configuration element.
-	 * @param name  Option/property name.
-	 * @param value Option/property value.
-	 */
-	Argument(final String name, final String value) {
-	    this.name = name;
-	    this.value = value;
-	}
-   
-	/**
-	 * Get startup argument name.
-	 * @return Startup argument name.
-	 */
-	public String getName() {
-	    return name;
-	}
-
-	/**
-	 * Get startup argument value.
-	 * @return Startup argument value.
-	 */
-	public String getValue() {
-	    return value;
-	}
-
     }
 
     /** Java options list. */
@@ -223,6 +148,14 @@ public class LoaderConfig {
      */
     void addMod(final String file, final String url) {
 	mods.addLast(new Mod(file, url));
+    }
+
+    /**
+     * Get startup class name.
+     * @return Startup class name.
+     */
+    public String getStartupClass() {
+        return startupClass;
     }
 
     /**

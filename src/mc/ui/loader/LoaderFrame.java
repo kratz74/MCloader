@@ -3,8 +3,6 @@
  */
 package mc.ui.loader;
 
-import mc.init.LoaderInit;
-
 /**
  *
  * @author kratz
@@ -16,6 +14,7 @@ public class LoaderFrame extends javax.swing.JFrame {
 
     /**
      * Creates a new instance of form LoaderFrame.
+     * @param ctx UI context.
      */
     public LoaderFrame(final UiContext ctx) {
         this.ctx = ctx;

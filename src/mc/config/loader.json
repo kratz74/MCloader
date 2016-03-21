@@ -41,7 +41,7 @@
     "Class" : "net.minecraft.launchwrapper.Launch",
 
     "Arguments" : {
-        "username" : "<userName>",
+        "username" : "<user>",
         "session" : "token:3f7c52dd20d0459c9d7187d41f93c4e4:f90d0677ebbf4283b5a82922d93fd9e1",
         "version" : "1.6.4-Forge9.11.1.965",
         "gameDir" : "<path>/cm164",

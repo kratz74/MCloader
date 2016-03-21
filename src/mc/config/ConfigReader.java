@@ -7,6 +7,8 @@ import com.fasterxml.jackson.core.JsonToken;
 import java.io.File;
 import java.io.IOException;
 import mc.json.JsonReader;
+import mc.log.LogLevel;
+import mc.log.Logger;
 
 /**
  * Reads loader configuration file.
@@ -14,13 +16,22 @@ import mc.json.JsonReader;
  */
 public class ConfigReader extends JsonReader<LoaderConfig> {
 
-    public static LoaderConfig read(final String file) {
+    /** Logger. */
+    private static final Logger LOG = Logger.getInstance();
+
+    /**
+     * Reads loader configuration file.
+     * @param file Loader configuration file to be read.
+     * @return Configuration file content as {@link LoaderConfig} instance.
+     */
+    public static LoaderConfig read(final String file) { 
 	ConfigReader r = null;
 	try {
+            LOG.log(LogLevel.FINE, "Reading configuration file: %s", file);
 	    r = new ConfigReader(new File(file));
 	    r.parse();
 	} catch (IOException ioe) {
-	    ioe.printStackTrace();
+            LOG.log(LogLevel.WARNING, "Error reading configuration file: %s", ioe);
 	} finally {
 	    if (r != null) {
 		r.close();
@@ -45,7 +56,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
      * {@code <property>    :: '{' "name" ':' <option_name> ',' "value" ':' <option_value> '}'}
      * @throws IOException 
      */
-    private LoaderConfig.Property property() throws IOException {
+    private Property property() throws IOException {
 	next();
 	if (token != JsonToken.FIELD_NAME) {
 	    throw new IOException("Expected Java option 'name' field name");
@@ -79,12 +90,8 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
             default:
                 throw new IOException("Expected 'value' field String or null value");
         }
-	//data.addMod(optionName, url);
-	System.out.print("Property/option: ");
-	System.out.print(optionName);
-	System.out.print(" = ");
-	System.out.println(value != null ? value : "null");
-        return new LoaderConfig.Property(name, value);
+        LOG.log(LogLevel.FINEST, 2, "Property/option %s = %s", optionName, value != null ? value : "null");
+        return new Property(optionName, value);
     }
 
     /**
@@ -93,6 +100,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
      */
     private void javaoptions() throws IOException {
 	// Read object starting symbol.
+        LOG.log(LogLevel.FINE, 1, "Processing JavaOptions list");
 	next();
 	if (token != JsonToken.START_ARRAY) {
 	    throw new IOException("Expecting array starting symbol '[' after JavaOptions");
@@ -100,7 +108,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
 	// Process java options elements stored in array.
 	next();
 	while (token == JsonToken.START_OBJECT) {
-	    final LoaderConfig.Property option = property();
+	    final Property option = property();
 	    next();
 	    if (token != JsonToken.END_OBJECT) {
 		throw new IOException("Expecting array ending symbol '}' after JavaOptions");
@@ -120,6 +128,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
      */
     private void properties() throws IOException {
 	// Read object starting symbol.
+        LOG.log(LogLevel.FINE, 1, "Processing Properties list");
 	next();
 	if (token != JsonToken.START_ARRAY) {
 	    throw new IOException("Expecting array starting symbol '[' after properties");
@@ -127,7 +136,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
 	// Process properties elements stored in array.
 	next();
 	while (token == JsonToken.START_OBJECT) {
-	    final LoaderConfig.Property property = property();
+	    final Property property = property();
 	    next();
 	    if (token != JsonToken.END_OBJECT) {
 		throw new IOException("Expecting array ending symbol '}' after properties");
@@ -146,6 +155,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
      * "ClassPath" ':' '[' <path> { ',' <path> } ']'
      */
     private void classpath() throws IOException {
+        LOG.log(LogLevel.FINE, 1, "Processing ClassPath list");
 	// Read array starting symbol.
 	next();
 	if (token != JsonToken.START_ARRAY) {
@@ -156,8 +166,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
 	while (token == JsonToken.VALUE_STRING) {
 	    String value = parser.getText();
 	    data.addClassPath(value);
-	    System.out.print("ClasPath Element: ");
-	    System.out.println(value);
+            LOG.log(LogLevel.FINEST, 2, "ClassPath: %s", value);
 	    next();
 	}
 	// Verify that last symbol is array end.
@@ -178,13 +187,13 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
 	}
 	String startupClass = parser.getText();
         data.setStartupClass(startupClass);
-        System.out.print("Startup class: ");
-        System.out.println(startupClass);
+        LOG.log(LogLevel.FINE, 1, "Startup class: %s", startupClass);
     }
     /**
      * Process Arguments.
      */
     private void arguments() throws IOException {
+        LOG.log(LogLevel.FINE, 1, "Processing Arguments list");
 	// Read object starting symbol.
 	next();
 	if (token != JsonToken.START_OBJECT) {
@@ -207,11 +216,8 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
                     throw new IOException("Expected 'value' field String or null value");
             }
             next();
-            data.addArgument(new LoaderConfig.Argument(name, value));
-            System.out.print("Argument: ");
-            System.out.print(name);
-            System.out.print(" = ");
-            System.out.println(value != null ? value : "null");
+            data.addArgument(new Argument(name, value));
+            LOG.log(LogLevel.FINEST, 2, "Argumant: %s = %s", name, value != null ? value : "null");
         }
 	// Verify that last symbol is object end.
 	if (token != JsonToken.END_OBJECT) {
@@ -253,16 +259,14 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
 	}
 	String url = parser.getText();
 	data.addMod(file, url);
-	System.out.print("Mod: ");
-	System.out.print(file);
-	System.out.print(" :: ");
-	System.out.println(url);
+        LOG.log(LogLevel.FINEST, 2, "Mod file: %s URL: %s", file, url);
     }
 
     /**
      * Process Mods structure.
      */
     private void mods() throws IOException {
+        LOG.log(LogLevel.FINE, 1, "Processing Mods list");
 	// Read array starting symbol.
 	next();
 	if (token != JsonToken.START_ARRAY) {

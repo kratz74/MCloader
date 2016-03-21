@@ -7,6 +7,8 @@ import com.fasterxml.jackson.core.JsonToken;
 import java.io.File;
 import java.io.IOException;
 import mc.json.JsonReader;
+import mc.log.LogLevel;
+import mc.log.Logger;
 
 /**
  * Reads loader initialization file.
@@ -14,23 +16,31 @@ import mc.json.JsonReader;
  */
 class InitReader extends JsonReader<LoaderInit> {
     
+    /** Logger. */
+    private static final Logger LOG = Logger.getInstance();
+
+    /**
+     * Reads loader initialization file.
+     * @param file Loader initialization file to be read.
+     * @return Initialization file content as {@link LoaderInit} instance.
+     */
     public static LoaderInit read(final String file) {
         InitReader r = null;
         File f = new File(file);
         if (f.canRead()) {
-            System.out.println("Reading " + file);
+            LOG.log(LogLevel.FINE, "Reading initialization file: %s", file);
             try {
                 r = new InitReader(f);
                 r.parse();
             } catch (IOException ioe) {
-                ioe.printStackTrace();
+                LOG.log(LogLevel.WARNING, "Error reading initialization file: %s", ioe);
             } finally {
                 if (r != null) {
                     r.close();
                 }
             }
         } else {
-            System.out.println("File " + file + " was not found");
+            LOG.log(LogLevel.INFO, "Initialization file %s was not found", file); 
         }
         return r != null ? r.getData() : null;
     }
@@ -56,8 +66,7 @@ class InitReader extends JsonReader<LoaderInit> {
 	}
         String path = parser.getText();
         data.setPath(path);
-        System.out.print("Path: ");
-        System.out.println(path);
+        LOG.log(LogLevel.FINEST, 1, "Path: %s", path);
     }
 
     /**
@@ -72,8 +81,7 @@ class InitReader extends JsonReader<LoaderInit> {
 	}
         String userName = parser.getText();
         data.setUserName(userName);
-        System.out.print("User name: ");
-        System.out.println(userName);
+        LOG.log(LogLevel.FINEST, 1, "User: %s", userName);
     }
 
     /**

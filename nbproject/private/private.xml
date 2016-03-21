@@ -3,10 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/data/archive/CMloader/src/mc/launcher/Arguments.java</file>
-            <file>file:/data/archive/CMloader/src/mc/config/LoaderConfig.java</file>
-            <file>file:/data/archive/CMloader/src/mc/config/loader2.json</file>
+            <file>file:/data/archive/CMloader/src/mc/ui/loader/FileUtils.java</file>
+            <file>file:/data/archive/CMloader/src/mc/ui/loader/LoaderFrame.java</file>
+            <file>file:/data/archive/CMloader/src/mc/log/Logger.java</file>
+            <file>file:/data/archive/CMloader/src/mc/launcher/JavaExecutor.java</file>
             <file>file:/data/archive/CMloader/src/mc/ui/loader/Main.java</file>
+            <file>file:/data/archive/CMloader/src/mc/ui/loader/UiContext.java</file>
         </group>
     </open-files>
 </project-private>

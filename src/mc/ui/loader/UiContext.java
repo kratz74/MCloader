@@ -18,13 +18,14 @@ public class UiContext {
 
     /**
      * Creates a new instance of UI context.
+     * @param init Loader initialization data.
      */
     public UiContext(final LoaderInit init) {
         this.init = init;
     }
 
     /**
-     * UI synchronization: Wake up thread waiting for UI to fiish.
+     * UI synchronization: Wake up thread waiting for UI to finish.
      */
     void wakeUp() {
         synchronized(this) {
