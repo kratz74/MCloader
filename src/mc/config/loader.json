@@ -1,6 +1,6 @@
 {
     "JavaOptions" : [
-        { "name" : "Xdock:icon", "value" : "<path>/assets/packs/ghostminepack/icon.png" },
+        { "name" : "Xdock:icon", "value" : "<path>/assets/icons/icon.png" },
         { "name" : "Xdock:name", "value" : "Carovny Minecraft 1.6.4" },
         { "name" : "Xmx2000m",   "value" : null }
     ],
@@ -8,7 +8,7 @@
     "Properties" : [
         { "name" : "java.library.path", "value" : "<path>/lib/native" },
         { "name" : "fml.core.libraries.mirror", "value" : "http://mirror.technicpack.net/Technic/lib/fml/%s" },
-        { "name" : "minecraft.applet.TargetDirectory", "value" : "<path>/cm164" },
+        { "name" : "minecraft.applet.TargetDirectory", "value" : "<path>" },
         { "name" : "java.net.preferIPv4Stack", "value" : "true" }
     ],
 
@@ -44,20 +44,47 @@
         "username" : "<user>",
         "session" : "token:3f7c52dd20d0459c9d7187d41f93c4e4:f90d0677ebbf4283b5a82922d93fd9e1",
         "version" : "1.6.4-Forge9.11.1.965",
-        "gameDir" : "<path>/cm164",
+        "gameDir" : "<path>",
         "assetsDir" : "<path>/assets/virtual/legacy",
         "tweakClass" : "cpw.mods.fml.common.launcher.FMLTweaker",
         "title" : "Carovny Minecraft 1.6.4",
         "width" : "1440",
         "height" : "900",
-        "icon" : "<path>/assets/packs/carovnyminecraft-reloaded/icon.png"
+        "icon" : "<path>/assets/icons/icon.png"
     },
 
     "Mods" : [
-        { "file" : "codechickencore-0.9.0.7.jar",
-          "url" : "http://chickenbones.net/maven/codechicken/CodeChickenCore/1.6.4-0.9.0.7/CodeChickenCore-1.6.4-0.9.0.7-universal.jar" },
-        { "file" : "Thaumcraft-4.1.0g.zip",
-          "url" : "file:///opt/minecraft/cmKratz/modpacks/ghostminepack/mods/Thaumcraft4.1.0g.zip" }
+        { "file" : "1.6.4/CodeChickenLib-universal-1.6.4-1.0.0.45.jar", "chksum" : "85412D97", "url" : "http://10.38.37.254/minecraft/cm164/mods/1.6.4/CodeChickenLib-universal-1.6.4-1.0.0.45.jar"},
+        { "file" : "1.6.4/ForgeMultipart.jar", "chksum" : "4481B5B3", "url" : "http://10.38.37.254/minecraft/cm164/mods/1.6.4/ForgeMultipart.jar"},
+        { "file" : "ArchimedesShips.zip",      "chksum" : "EE62C877", "url" : "http://10.38.37.254/minecraft/cm164/mods/ArchimedesShips.zip"},
+        { "file" : "BiblioCraft.zip",          "chksum" : "0F048113", "url" : "http://10.38.37.254/minecraft/cm164/mods/BiblioCraft.zip"},
+        { "file" : "CodeChickenCore.jar",      "chksum" : "8E6F7B0A", "url" : "http://chickenbones.net/maven/codechicken/CodeChickenCore/1.6.4-0.9.0.7/CodeChickenCore-1.6.4-0.9.0.7-universal.jar"},
+        { "file" : "CofhCore.jar",             "chksum" : "17D46A2B", "url" : "http://10.38.37.254/minecraft/cm164/mods/CofhCore.jar"},
+        { "file" : "CustomMobSpawner.zip",     "chksum" : "9573C704", "url" : "http://10.38.37.254/minecraft/cm164/mods/CustomMobSpawner.zip"},
+        { "file" : "DamageIndicators.zip",     "chksum" : "C8F54422", "url" : "http://10.38.37.254/minecraft/cm164/mods/DamageIndicators.zip"},
+        { "file" : "EnderStorage.jar",         "chksum" : "DBA2CC1B", "url" : "http://10.38.37.254/minecraft/cm164/mods/EnderStorage.jar"},
+        { "file" : "ExtrabiomesXL.jar",        "chksum" : "5A7DEF1A", "url" : "http://10.38.37.254/minecraft/cm164/mods/ExtrabiomesXL.jar"},
+        { "file" : "ForgeAuth.zip",            "chksum" : "421C135C", "url" : "http://10.38.37.254/minecraft/cm164/mods/ForgeAuth.zip"},
+        { "file" : "ForgePermsWithoutPEX.jar", "chksum" : "90AFA459", "url" : "http://10.38.37.254/minecraft/cm164/mods/ForgePermsWithoutPEX.jar"},
+        { "file" : "GuiAPI.jar",               "chksum" : "D2C6A437", "url" : "http://10.38.37.254/minecraft/cm164/mods/GuiAPI.jar"},
+        { "file" : "HaumCraft.zip",            "chksum" : "AFDC68E5", "url" : "http://10.38.37.254/minecraft/cm164/mods/HaumCraft.zip"},
+        { "file" : "InventoryTweaks.jar",      "chksum" : "A2D0A7FA", "url" : "http://10.38.37.254/minecraft/cm164/mods/InventoryTweaks.jar"},
+        { "file" : "IronChests.zip",           "chksum" : "DCA4F2CC", "url" : "http://10.38.37.254/minecraft/cm164/mods/IronChests.zip"},
+        { "file" : "LegacyJavaFixer.jar",      "chksum" : "59516012", "url" : "http://10.38.37.254/minecraft/cm164/mods/LegacyJavaFixer.jar"},
+        { "file" : "MoCreatures.zip",          "chksum" : "FC694DEE", "url" : "http://10.38.37.254/minecraft/cm164/mods/MoCreatures.zip"},
+        { "file" : "MyTown.jar",               "chksum" : "FBED1DB5", "url" : "http://10.38.37.254/minecraft/cm164/mods/MyTown.jar"},
+        { "file" : "MyTownLib.jar",            "chksum" : "9F2164F6", "url" : "http://10.38.37.254/minecraft/cm164/mods/MyTownLib.jar"},
+        { "file" : "Mystcraft.zip",            "chksum" : "21E32423", "url" : "http://10.38.37.254/minecraft/cm164/mods/Mystcraft.zip"},
+        { "file" : "NotenoughItems.jar",       "chksum" : "219B12FE", "url" : "http://10.38.37.254/minecraft/cm164/mods/NotenoughItems.jar"},
+        { "file" : "ShowDurability.jar",       "chksum" : "84729EE5", "url" : "http://10.38.37.254/minecraft/cm164/mods/ShowDurability.jar"},
+        { "file" : "SoulShards.jar",           "chksum" : "DEA96A7C", "url" : "http://10.38.37.254/minecraft/cm164/mods/SoulShards.jar"},
+        { "file" : "TConstruct.jar",           "chksum" : "9A80C61F", "url" : "http://10.38.37.254/minecraft/cm164/mods/TConstruct.jar"},
+        { "file" : "TMechworks.jar",           "chksum" : "616EEB35", "url" : "http://10.38.37.254/minecraft/cm164/mods/TMechworks.jar"},
+        { "file" : "TrainCraft.jar",           "chksum" : "4342F645", "url" : "http://10.38.37.254/minecraft/cm164/mods/TrainCraft.jar"},
+        { "file" : "TwilightForest.jar",       "chksum" : "14E70811", "url" : "http://10.38.37.254/minecraft/cm164/mods/TwilightForest.jar"},
+        { "file" : "VoxelMap.zip",             "chksum" : "F7841E47", "url" : "http://10.38.37.254/minecraft/cm164/mods/VoxelMap.zip"},
+        { "file" : "Waila.zip",                "chksum" : "311BEA98", "url" : "http://10.38.37.254/minecraft/cm164/mods/Waila.zip"},
+        { "file" : "WeaponMod.zip",            "chksum" : "2E513DFC", "url" : "http://10.38.37.254/minecraft/cm164/mods/WeaponMod.zip"}
     ]
 
 }

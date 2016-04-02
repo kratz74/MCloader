@@ -109,6 +109,7 @@ public class JavaExecutor {
         final int sepLength = File.separator.length();
         final int pSepLen = File.pathSeparator.length();
         final int itemsCount = classpath.size();
+
         final boolean pathEndsWithSeparator = path.endsWith(File.separator);
         // Calculate classpath String length to avoid StringBuilder resizing
         int len = pathLen * itemsCount + (pSepLen * (itemsCount - 1));
@@ -134,6 +135,7 @@ public class JavaExecutor {
             sb.append(item);
         }
         String cp = sb.toString();
+
         arguments.add(JAVA_CP_PREFIX);
         arguments.add(cp);
         LOG.log(LogLevel.FINEST, "Added classpath: %s", cp);

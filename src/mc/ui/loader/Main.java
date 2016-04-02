@@ -17,15 +17,18 @@ import mc.launcher.JavaExecutor;
  */
 public class Main {
 
+    /** Thread name. */
+    private static final String THREAD_NAME = "CM164.Main";
 
     /** 
      * @param args the command line arguments
      */
     @SuppressWarnings("SleepWhileInLoop")
     public static void main(String[] args) {
-        final LoaderInit init = LoaderInit.create("/data/archive/CMloader/src/mc/init");
-        final LoaderConfig config = ConfigReader.read("/data/archive/CMloader/src/mc/config/loader.json");
-        final UiContext uiCtx = new UiContext(init);
+        Thread.currentThread().setName(THREAD_NAME);
+        final LoaderInit init = LoaderInit.create("/data/CMloader/src/mc/init");
+        final LoaderConfig config = ConfigReader.read("/data/CMloader/src/mc/config/loader.json");
+        final UiContext uiCtx = new UiContext(init, config);
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
@@ -34,7 +37,7 @@ public class Main {
             }
         });
         uiCtx.waitForUi();
-        LoaderInit.persist("/data/archive/CMloader/src/mc/init", init);
+        LoaderInit.persist("/data/CMloader/src/mc/init", init);
         JavaExecutor executor = new JavaExecutor(init, config);
         Process p = executor.exec();
 
