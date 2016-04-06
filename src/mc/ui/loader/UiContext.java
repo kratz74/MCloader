@@ -24,6 +24,9 @@ public class UiContext {
     /** Game modules that are not OK. */
     LinkedList<LoaderConfig.Mod> modsToFix;
 
+    /** Exit launcher check box state. */
+    boolean exitLauncher;
+    
     /**
      * Creates a new instance of UI context.
      * @param init   Loader initialization data.
@@ -32,7 +35,8 @@ public class UiContext {
     public UiContext(final LoaderInit init, final LoaderConfig config) {
         this.init = init;
         this.config = config;
-        this.modsToFix = GameCheck.checkModules(init.getPath(), config.getMods());
+        this.modsToFix = GameCheck.checkModules(init.getPath(), config.getModsPath(), config.getMods());
+        this.exitLauncher = false;
     }
 
     /**
@@ -74,7 +78,27 @@ public class UiContext {
         if (this.modsToFix != null) {
             this.modsToFix.clear();
         }
-        this.modsToFix = GameCheck.checkModules(init.getPath(), config.getMods());
+        this.modsToFix = GameCheck.checkModules(init.getPath(), config.getModsPath(), config.getMods());
+    }
+
+    /**
+     * Run modules check and update list of game modules that are not OK.
+     * @param path Game installation path.
+     */
+    void checkModules(final String path) {
+        // Help GC.
+        if (this.modsToFix != null) {
+            this.modsToFix.clear();
+        }
+        this.modsToFix = GameCheck.checkModules(path, config.getModsPath(), config.getMods());
+    }
+
+    /**
+     * Get exit launcher check box state.
+     * @return Exit launcher check box state.
+     */
+    public boolean getExitGame() {
+        return exitLauncher;
     }
 
 }

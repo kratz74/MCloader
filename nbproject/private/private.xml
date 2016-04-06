@@ -3,21 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/data/CMloader/src/mc/config/LoaderConfig.java</file>
-            <file>file:/data/CMloader/src/mc/installer/DownloadModule.java</file>
-            <file>file:/data/CMloader/src/mc/config/ConfigReader.java</file>
-            <file>file:/data/CMloader/src/mc/ui/loader/FileUtils.java</file>
-            <file>file:/data/CMloader/src/mc/init/.cm164</file>
-            <file>file:/data/CMloader/src/mc/ui/loader/DownloadListener.java</file>
-            <file>file:/data/CMloader/src/mc/installer/GameCheck.java</file>
-            <file>file:/data/CMloader/src/mc/config/loader.json</file>
-            <file>file:/data/CMloader/src/mc/ui/loader/UiContext.java</file>
-            <file>file:/data/CMloader/src/mc/log/Logger.java</file>
             <file>file:/data/CMloader/src/mc/ui/loader/LoaderFrame.java</file>
-            <file>file:/data/CMloader/src/mc/ui/loader/ModuleDownloadListener.java</file>
-            <file>file:/data/CMloader/src/mc/installer/DownloadModules.java</file>
-            <file>file:/data/CMloader/src/mc/installer/Downloader.java</file>
+            <file>file:/data/CMloader/src/mc/config/LoaderConfig.java</file>
+            <file>file:/data/CMloader/src/mc/config/loader.json</file>
             <file>file:/data/CMloader/src/mc/ui/loader/Main.java</file>
+            <file>file:/data/CMloader/src/mc/ui/loader/UiContext.java</file>
         </group>
     </open-files>
 </project-private>

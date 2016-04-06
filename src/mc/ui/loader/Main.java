@@ -41,6 +41,9 @@ public class Main {
         JavaExecutor executor = new JavaExecutor(init, config);
         Process p = executor.exec();
 
+        if (uiCtx.getExitGame())
+            return;
+
         // TODO: This shall be rewritten later.
         try {
             InputStreamReader pi = new InputStreamReader(p.getInputStream());

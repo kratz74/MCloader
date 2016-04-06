@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.zip.Adler32;
 import mc.config.LoaderConfig;
@@ -53,31 +52,32 @@ public class GameCheck {
     /**
      * Check game modules.
      * @param path Game installation path.
+     * @param modsPath Modules path under game installation root.
      * @param modules List of game modules.
      * @return List of missing or invalid modules.
      */
     public static final LinkedList<LoaderConfig.Mod> checkModules(
-            final String path, final LinkedList<LoaderConfig.Mod> modules) {
+            final String path, final String modsPath, final LinkedList<LoaderConfig.Mod> modules) {
         final byte[] buff = new byte[BUFFER_SIZE];
         final LinkedList<LoaderConfig.Mod> failed = new  LinkedList<>();
         //long tsBeg = System.currentTimeMillis();
         // Lambdas (even parallel stream) are slover!
         for (LoaderConfig.Mod mod : modules) {
             final Adler32 ad32 = new Adler32();
-            final String filePath = mod.buildLocalPath(path);
+            final String filePath = mod.buildLocalPath(path, modsPath);
             final File modFile = new File(filePath);
             if (modFile.isFile() && modFile.canRead()) {
                 final long chkSum = adler32(modFile, buff);
                 final long modChkSum = mod.getChkSum();
                 if (chkSum != modChkSum) {
                     failed.add(mod);
-                    Logger.log(LogLevel.INFO, "Invalid checksum for %s: %X :: %X", modFile.getName(), chkSum, modChkSum);
+                    Logger.log(LogLevel.FINE, "Invalid checksum for %s: %X :: %X", modFile.getName(), chkSum, modChkSum);
                 } else {
-                    Logger.log(LogLevel.INFO, "Checksum OK for %s: %X :: %X", modFile.getName(), chkSum, modChkSum);
+                    Logger.log(LogLevel.FINE, "Checksum OK for %s: %X :: %X", modFile.getName(), chkSum, modChkSum);
                 }
             } else {
                 failed.add(mod);
-                Logger.log(LogLevel.INFO, "Missing %s", modFile.getName());
+                Logger.log(LogLevel.FINE, "Missing %s", modFile.getName());
             }
         }
         //Logger.log(LogLevel.INFO, "Time consumed: %d ms", System.currentTimeMillis() - tsBeg);
@@ -85,8 +85,19 @@ public class GameCheck {
     }
 
     /**
+     * Check existence of game installation root directory.
+     * @param path Game installation path.
+     * @return Value of {@code true} when game installation root directory exists or {@code false} otherwise.
+     */
+    public boolean checkInstallDir(final String path) {
+        final File fPath = new File(path);
+        return fPath.isDirectory();
+    }
+
+    /**
      * Check existence of class path files.
      * @param path Game installation path.
+     * @return Value of {@code true} when all class path files exist or {@code false} otherwise.
      */
     private boolean checkClassPath(final String path) {
         boolean cpOk = true;

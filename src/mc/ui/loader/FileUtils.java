@@ -11,7 +11,7 @@ import java.io.File;
 public class FileUtils {
 
     /** Modules subdirectory under game installation root directory. */
-    public static final String MODULES_DIR = "mods";
+    //public static final String MODULES_DIR = "mods";
 
     /**
      * Create full path {@link String} from directory and file name.
@@ -53,5 +53,5 @@ public class FileUtils {
         sb.append(file);
         return sb.toString();
     }
-
+  
 }

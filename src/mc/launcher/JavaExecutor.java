@@ -35,9 +35,6 @@ public class JavaExecutor {
     /** Main class argument prefix. */
     private static final String CLASS_ARG_PREFIX = "--";
 
-    /** Logger. */
-    private static final Logger LOG = Logger.getInstance();
-
     /**
      * Add Java options into specified execution arguments list.
      * @param arguments   Target execution arguments list.
@@ -60,9 +57,9 @@ public class JavaExecutor {
             }
             String option = sb.toString();
             arguments.add(option);
-            LOG.log(LogLevel.FINEST, "Added java option: %s", option);
+            Logger.log(LogLevel.FINEST, "Added java option: %s", option);
             if (option.length() != len) {
-                LOG.log(LogLevel.WARNING, "Java option length calculation error for %s", option);
+                Logger.log(LogLevel.WARNING, "Java option length calculation error for %s", option);
             }
         }
     }
@@ -89,9 +86,9 @@ public class JavaExecutor {
             }
             String propArg = sb.toString();
             arguments.add(propArg);
-            LOG.log(LogLevel.FINEST, "Added java property: %s", propArg);
+            Logger.log(LogLevel.FINEST, "Added java property: %s", propArg);
             if (propArg.length() != len) {
-                LOG.log(LogLevel.WARNING, "Java property length calculation error for %s", propArg);
+                Logger.log(LogLevel.WARNING, "Java property length calculation error for %s", propArg);
             }
         }
     }
@@ -138,9 +135,9 @@ public class JavaExecutor {
 
         arguments.add(JAVA_CP_PREFIX);
         arguments.add(cp);
-        LOG.log(LogLevel.FINEST, "Added classpath: %s", cp);
+        Logger.log(LogLevel.FINEST, "Added classpath: %s", cp);
         if (cp.length() != len) {
-            LOG.log(LogLevel.WARNING, "Java property length calculation error for class path");
+            Logger.log(LogLevel.WARNING, "Java property length calculation error for class path");
         }
     }
 
@@ -151,7 +148,7 @@ public class JavaExecutor {
      */
     private static void addMainClass(final LinkedList<String> arguments, final String className) {
         arguments.add(className);
-        LOG.log(LogLevel.FINEST, "Added main class: %s", className);
+        Logger.log(LogLevel.FINEST, "Added main class: %s", className);
     }
 
     /**
@@ -173,12 +170,12 @@ public class JavaExecutor {
             arguments.add(argName);
             if (value != null) {
                 arguments.add(value);
-                LOG.log(LogLevel.FINEST, "Added main class argument: %s %s", argName, value);
+                Logger.log(LogLevel.FINEST, "Added main class argument: %s %s", argName, value);
             } else {
-                LOG.log(LogLevel.FINEST, "Added main class argument: %s", argName);
+                Logger.log(LogLevel.FINEST, "Added main class argument: %s", argName);
             }
             if (argName.length() != len) {
-                LOG.log(LogLevel.WARNING, "Main class argument length calculation error for %s", argName);
+                Logger.log(LogLevel.WARNING, "Main class argument length calculation error for %s", argName);
             }
             
         }
@@ -219,7 +216,7 @@ public class JavaExecutor {
             addArguments(args, config.getArguments(), init);
             return listToArray(args);
         } else {
-            LOG.log(LogLevel.FATAL, "Java executable is not available");
+            Logger.log(LogLevel.FATAL, "Java executable is not available");
         }
         return null;
     }
@@ -227,6 +224,9 @@ public class JavaExecutor {
     /** Execution arguments. */
     private final String[] execArgs;
 
+    /** Game installation root directory. */
+    private final File path;
+    
     /**
      * Creates an empty instance of Java VM executor.
      * @param init Loader initialization data.
@@ -234,16 +234,18 @@ public class JavaExecutor {
      */
     public JavaExecutor(final LoaderInit init, final LoaderConfig config) {
         this.execArgs = buildArguments(config, new JavaRuntime(), init);
+        this.path = new File(init.getPath());
         for (String arg : execArgs) {
-            LOG.log(LogLevel.FINEST, 1, "Exec: %s", arg);
+            Logger.log(LogLevel.FINEST, 1, "Exec: %s", arg);
         }
     }
 
     public Process exec() {
         try {
-            return Runtime.getRuntime().exec(execArgs);
+            Logger.log(LogLevel.FINE, "Running game in %s", path.getAbsoluteFile());
+            return Runtime.getRuntime().exec(execArgs, (String[])null, path);
         } catch (IOException ex) {
-            LOG.log(LogLevel.FATAL, "Could not execute process: %s", ex);
+            Logger.log(LogLevel.FATAL, "Could not execute process: %s", ex);
             return null;
         }
     }

@@ -6,10 +6,10 @@ package mc.ui.loader;
 import mc.config.LoaderConfig;
 
 /**
- * Process module download events.
+ * Process game base download events.
  */
-public class ModuleDownloadListener implements DownloadListener {
-
+public class BaseDownloadListener implements DownloadListener {
+    
     /** UI instance. */
     private final LoaderFrame ui;
 
@@ -17,7 +17,7 @@ public class ModuleDownloadListener implements DownloadListener {
      * Creates an instance of download progress bar events listener.
      * @param ui UI instance.
      */
-    ModuleDownloadListener(final LoaderFrame ui) {
+    BaseDownloadListener(final LoaderFrame ui) {
         this.ui = ui;
     }
 
@@ -47,7 +47,7 @@ public class ModuleDownloadListener implements DownloadListener {
         ui.downloadProgress.setVisible(false);
         ui.resetInstaller();
         ui.resetDownloadUI();
-        ui.updateGameStatusForModules();
+        ui.updateGameStatusForBase();
     }
 
     /**
@@ -74,7 +74,6 @@ public class ModuleDownloadListener implements DownloadListener {
      */
     @Override
     public void moduleDone(LoaderConfig.Mod mod) {
-        ui.moduleDownloadFinished(mod);
+        throw new UnsupportedOperationException("Base game package does not contain modules");
     }
-    
 }

@@ -56,11 +56,12 @@ public class LoaderConfig {
 
         /**
          * Build absolute path of local module file.
-         * @param path Game installation path.
+         * @param path     Game installation path.
+         * @param modsPath Modules path under game installation root.
          * @return Absolute path of local module file.
          */
-        public String buildLocalPath(final String path){
-            return FileUtils.fullPath(path, FileUtils.MODULES_DIR, file);
+        public String buildLocalPath(final String path, final String modsPath){
+            return FileUtils.fullPath(path, modsPath, file);
         }
 
         /**
@@ -89,6 +90,12 @@ public class LoaderConfig {
     /** ClassPath list. */
     private final LinkedList<String> classpath;
 
+    /** Game base package URL. */
+    private String gameUrl;
+
+    /** Modules path under game root directory. */
+    private String modsPath;
+
     /** Main class startup arguments list. */
     private final LinkedList<Argument> arguments;
 
@@ -107,6 +114,7 @@ public class LoaderConfig {
 	classpath = new LinkedList<>();
         arguments = new LinkedList<>();
 	mods = new LinkedList<>();
+        gameUrl = null;
         startupClass = null;
     }
 
@@ -156,6 +164,38 @@ public class LoaderConfig {
      */
     public LinkedList<String> getClassPath() {
         return classpath;
+    }
+
+    /**
+     * Get game base package URL.
+     * @return Game base package URL
+     */
+    public String getGameUrl() {
+        return gameUrl;
+    }
+
+    /**
+     * Set game base package URL.
+     * @param gameUrl Game base package URL.
+     */
+    void setGameUrl(final String gameUrl) {
+        this.gameUrl = gameUrl;
+    }
+
+    /**
+     * Get modules path under game root directory.
+     * @return Modules path under game root directory.
+     */
+    public String getModsPath() {
+        return modsPath;
+    }
+
+    /**
+     * Set modules path under game root directory.
+     * @param modsPath Modules path under game root directory.
+     */
+    void setModsPath(final String modsPath) {
+        this.modsPath = modsPath;
     }
 
     /**

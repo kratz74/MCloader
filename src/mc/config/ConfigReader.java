@@ -224,6 +224,41 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
     }
 
     /**
+     * Process Game.
+     */
+    private void game() throws IOException {
+        Logger.log(LogLevel.FINE, 1, "Processing Game object");
+	// Read object starting symbol.
+	next();
+	if (token != JsonToken.START_OBJECT) {
+	    throw new IOException("Expecting object starting symbol '{' after Game");
+	}
+        next();
+        while (token == JsonToken.FIELD_NAME) {
+            final String name = parser.getCurrentName();
+            next();
+            if (token != JsonToken.VALUE_STRING) {
+                throw new IOException("Expected field String value");
+            }
+            String value = parser.getText();
+            next();
+            switch(name) {
+                case "url":
+                    data.setGameUrl(value);
+                    Logger.log(LogLevel.FINEST, 2, "Game base package URL: %s", value);
+                    break;
+                case "mods":
+                    data.setModsPath(value);
+                    Logger.log(LogLevel.FINEST, 2, "Game modules directory: %s", value);
+                    break;
+            }
+        }
+        if (token != JsonToken.END_OBJECT) {
+	    throw new IOException("Expecting object ending symbol '}' after Arguments elements");
+	}       
+    }
+
+    /**
      * Process module object.
      * <p>
      * {@code <module> :: '{' "file" ':' <file_name> ',' "chksum" ':' <Adler32_hexa> "url" ':' <download_url> '}' }
@@ -332,6 +367,9 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
                             break;
                         case "arguments":
                             arguments();
+                            break;
+                        case "game":
+                            game();
                             break;
                         case "mods":
                             mods();

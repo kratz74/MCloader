@@ -112,7 +112,7 @@ public class Logger {
      * Creates an instance of logger.
      */
     private Logger() {
-        level = LogLevel.ALL;
+        level = LogLevel.INFO;
         indentSize = 2;
     }
 

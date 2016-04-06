@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import mc.config.LoaderConfig;
+import mc.installer.DownloadBase;
 import mc.installer.DownloadModules;
 import mc.installer.Downloader;
 
@@ -21,6 +23,44 @@ import mc.installer.Downloader;
  * @author kratz
  */
 public class LoaderFrame extends javax.swing.JFrame {
+
+    private static enum GameState {
+        /** Game installation path does not exist. */
+        NO_PATH,
+        /** Game base installation is missing or is broken. */
+        INSTALL,
+        /** Game modules need update. */
+        MODULES,
+        /** Game installation is OK. */
+        OK;
+
+        /**
+         * Get game state depending on conditions.
+         * @param pathExists   Game installation path exists.
+         * @param gameCheck    Game base installation check passed.
+         * @param modulesCheck Game modules check passed.
+         * @return Current game state depending on provided indicators.
+         */
+        private static GameState gameState(final boolean pathExists, final boolean gameCheck, final boolean modulesCheck) {
+            if (pathExists) {
+                if (gameCheck) {
+                    if (modulesCheck) {
+                        Logger.log(LogLevel.FINE, "Game state: %s", GameState.OK);
+                        return GameState.OK;
+                    } else {
+                        Logger.log(LogLevel.FINE, "Game state: %s", GameState.MODULES);
+                        return GameState.MODULES;
+                    }
+                } else {
+                    Logger.log(LogLevel.FINE, "Game state: %s", GameState.INSTALL);
+                    return GameState.INSTALL;
+                }
+            } else {
+                Logger.log(LogLevel.FINE, "Game state: %s", GameState.NO_PATH);
+                return GameState.NO_PATH;
+            }
+        }
+    };
 
     /** Dark red color. */
     private static final Color DARK_RED = new java.awt.Color(0x68, 0, 0);
@@ -53,6 +93,18 @@ public class LoaderFrame extends javax.swing.JFrame {
         return passw != null && passw.length > 2;
     }
 
+    /**
+     * Create and initialize directory chooser.
+     * @returns Initialized directory chooser.
+     */
+    private static JFileChooser createDirectoryChooser() {
+        final JFileChooser directoryChooser = new JFileChooser();
+        directoryChooser.setDialogTitle("Select Game installation directory");
+        directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        directoryChooser.setAcceptAllFileFilterUsed(false);
+        return directoryChooser;
+    }
+
     /** Loader initialization object. */
     final UiContext ctx;
     /** Game installation check. */
@@ -60,9 +112,13 @@ public class LoaderFrame extends javax.swing.JFrame {
     /** Picture with game logo. */
     final BufferedImage logoPicure;
 
-    /** Download change listener. */
-    final DownloadListener downloadListener;
+    final JFileChooser directoryChooser;
 
+    /** Download change listener. */
+//    final DownloadListener downloadListener;
+
+    /** Game installation path exists. Cache for checks without path modification. */
+    boolean pathExists;
     /** Game installation OK for current path. Cache for checks without path modification. */
     boolean gameCheckCache;
     /** User name is OK for the game. Cache for checks without user modification. */
@@ -70,6 +126,9 @@ public class LoaderFrame extends javax.swing.JFrame {
     /** User password is OK for the game. Cache for checks without user modification. */
     boolean passCheckCache;
 
+    /** Current game installation state depending on indicators. */
+    GameState installationState;
+    
     /** Game components download handler. */
     private Downloader installer;
 
@@ -80,17 +139,20 @@ public class LoaderFrame extends javax.swing.JFrame {
     public LoaderFrame(final UiContext ctx) {
         this.ctx = ctx;
         check = new GameCheck(ctx.config);
-        gameCheckCache = ctx.init.getPath() != null && check.check(ctx.init.getPath());
+        pathExists = check.checkInstallDir(ctx.init.getPath());
+        gameCheckCache = pathExists && ctx.init.getPath() != null && check.check(ctx.init.getPath());
         userCheckCache = checkUserName(ctx.init.getUserName());
         passCheckCache = false;
+        installationState = GameState.gameState(pathExists, gameCheckCache, ctx.modsToFix.isEmpty());
         logoPicure = readImage("/data/CMloader/src/mc/launcher/thaumcraft.png");
+        directoryChooser = createDirectoryChooser();
         Logger.log(LogLevel.FINE, "Game start is %senabled", startEnabled() ? "" : "not ");
         Logger.log(LogLevel.FINEST, "  Game path: %s", gameCheckCache ? "OK" : "Not OK ");
         Logger.log(LogLevel.FINEST, "  User name: %s", userCheckCache ? "OK" : "Not OK ");
         Logger.log(LogLevel.FINEST, "  Password:  %s", passCheckCache ? "OK" : "Not OK ");
         initComponents();
-        downloadListener = new ModuleDownloadListener(this);
-        installer = initDownloader();
+//        downloadListener = new ModuleDownloadListener(this);
+        installer = null;
         initDownloadComponents();
     }
 
@@ -106,7 +168,7 @@ public class LoaderFrame extends javax.swing.JFrame {
      * Validates whether to enable {@code Install} button.
      */
     private boolean installEnabled() {
-        return installer != null && !installer.isRunning();
+        return installationState != GameState.OK && installer == null;
     }
 
      /**
@@ -145,11 +207,13 @@ public class LoaderFrame extends javax.swing.JFrame {
      * Modules status message.
      * @return UI message depending on current modules status.
      */
-    private String modulesStatusMesage() {
-        if (ctx.modsToFix.isEmpty()) {
-            return "Modules are OK";
-        } else {
-            return "Modules update required. Go to Install tab";
+    private String gameStatusMesage() {
+        switch (installationState) {
+            case NO_PATH: return "Game directory does not exist.";
+            case INSTALL: return "Game needs reinstallation.";
+            case MODULES: return "Modules update required. Go to Install tab";
+            case OK: return "Game is OK";
+            default: throw new IllegalStateException("Unknown game installation state");
         }
     }
 
@@ -162,13 +226,32 @@ public class LoaderFrame extends javax.swing.JFrame {
     }
 
     /**
-     * Update modules status in UI.
+     * Update UI status after module download finished.
      */
-    void updateModulesStatus() {
-        ctx.checkModules();
-        modulesState.setForeground(modulesStatusColor());
-        modulesState.setText(modulesStatusMesage());
+    void updateGameStatusForBase() {
+        final String gamePath = path.getText();
+        pathExists = check.checkInstallDir(gamePath);
+        gameCheckCache = pathExists && gamePath != null && check.check(gamePath);
+        ctx.checkModules(path.getText());
+        installationState = GameState.gameState(pathExists, gameCheckCache, ctx.modsToFix.isEmpty());
+        gameState.setForeground(modulesStatusColor());
+        gameState.setText(gameStatusMesage());
         buttonStart.setEnabled(startEnabled());
+        buttonInstall.setEnabled(installEnabled());
+        downloadModsList.setText(modulesToInstallText());
+    }
+
+    /**
+     * Update UI status after module download finished.
+     */
+    void updateGameStatusForModules() {
+        ctx.checkModules(path.getText());
+        installationState = GameState.gameState(pathExists, gameCheckCache, ctx.modsToFix.isEmpty());
+        gameState.setForeground(modulesStatusColor());
+        gameState.setText(gameStatusMesage());
+        buttonStart.setEnabled(startEnabled());
+        buttonInstall.setEnabled(installEnabled());
+        downloadModsList.setText(modulesToInstallText());
     }
     
     /**
@@ -185,18 +268,41 @@ public class LoaderFrame extends javax.swing.JFrame {
      * @return String containing list of modules to be installed.
      */
     private String modulesToInstallText() {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (LoaderConfig.Mod mod : ctx.modsToFix) {
-            if (first) {
-                first = false;
-            } else {
-                sb.append('\n');
-            }
-            sb.append(' ');
-            sb.append(mod.getFile());
+        switch(installationState) {
+            case NO_PATH:
+                return "";
+            case INSTALL:
+                return "Base game";
+            case MODULES:
+                StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                for (LoaderConfig.Mod mod : ctx.modsToFix) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append('\n');
+                    }
+                    sb.append(' ');
+                    int from = mod.getFile().lastIndexOf(File.separatorChar);
+                    if (from >= 0) {
+                        sb.append(mod.getFile().substring(from+1));
+                    } else {
+                        sb.append(mod.getFile());
+                    }
+                }
+                return sb.toString();
+            case OK:
+                return "";
+            default: throw new IllegalStateException("Unknown game installation state");
         }
-        return sb.toString();
+    }
+
+    /**
+     * Reset {@link Downloader} component.
+     * Sets component to {@code null}.
+     */
+    void resetInstaller() {
+        installer = null;
     }
 
     /**
@@ -204,10 +310,14 @@ public class LoaderFrame extends javax.swing.JFrame {
      * @return {@link Downloader} component depending on current game installation state.
      */
     private Downloader initDownloader() {
-        if (gameCheckCache && ctx.modsToFix != null && !ctx.modsToFix.isEmpty()) {
-            return new DownloadModules(ctx.init.getPath(), ctx.modsToFix, downloadListener);
-        } else {
-            return null;
+        switch(installationState) {
+            case NO_PATH:
+            case INSTALL: return new DownloadBase(
+                    path.getText(), ctx.config.getGameUrl(), new BaseDownloadListener(this));
+            case MODULES: return new DownloadModules(
+                    path.getText(), ctx.config.getModsPath(), ctx.modsToFix, new ModuleDownloadListener(this));
+            case OK: return null;
+            default: throw new IllegalStateException("Unknown game installation state");
         }
     }
 
@@ -226,11 +336,7 @@ public class LoaderFrame extends javax.swing.JFrame {
             downloadModsList.setEnabled(true);
             downloadModsList.setVisible(true);
         }
-        if (installEnabled()) {
-            buttonInstall.setEnabled(true);
-        } else {
-            buttonInstall.setEnabled(false);
-        }
+        buttonInstall.setEnabled(installEnabled());
     }
 
     /**
@@ -248,16 +354,18 @@ public class LoaderFrame extends javax.swing.JFrame {
         password = new javax.swing.JPasswordField();
         tabs = new javax.swing.JTabbedPane();
         game = new javax.swing.JPanel();
-        pathLabel = new javax.swing.JLabel();
-        path = new javax.swing.JTextField();
         picture = new javax.swing.JLabel(new ImageIcon(logoPicure));
-        modulesState = new javax.swing.JLabel();
         install = new javax.swing.JPanel();
         downloadLabel = new javax.swing.JLabel();
         downloadProgress = new javax.swing.JProgressBar();
         buttonInstall = new javax.swing.JButton();
         modulesList = new javax.swing.JScrollPane();
         downloadModsList = new javax.swing.JTextPane();
+        pathLabel = new javax.swing.JLabel();
+        path = new javax.swing.JTextField();
+        selectPath = new javax.swing.JButton();
+        gameState = new javax.swing.JLabel();
+        exitCheckBox = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(800, 600));
@@ -293,46 +401,16 @@ public class LoaderFrame extends javax.swing.JFrame {
             }
         });
 
-        pathLabel.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
-        pathLabel.setForeground(pathLabelColor());
-        pathLabel.setText("Path:");
-
-        path.setText(ctx.init.getPath());
-        path.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                checkPathChange(evt);
-            }
-        });
-
-        modulesState.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
-        modulesState.setForeground(modulesStatusColor());
-        modulesState.setText(modulesStatusMesage());
-
         javax.swing.GroupLayout gameLayout = new javax.swing.GroupLayout(game);
         game.setLayout(gameLayout);
         gameLayout.setHorizontalGroup(
             gameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(picture, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(gameLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(gameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(gameLayout.createSequentialGroup()
-                        .addComponent(pathLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(path, javax.swing.GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE))
-                    .addComponent(modulesState, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+            .addComponent(picture, javax.swing.GroupLayout.DEFAULT_SIZE, 613, Short.MAX_VALUE)
         );
         gameLayout.setVerticalGroup(
             gameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(gameLayout.createSequentialGroup()
-                .addComponent(picture, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(modulesState)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(gameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(pathLabel)
-                    .addComponent(path, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(picture, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -360,10 +438,28 @@ public class LoaderFrame extends javax.swing.JFrame {
         downloadModsList.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         downloadModsList.setText(modulesToInstallText());
         downloadModsList.setFocusable(false);
-        downloadModsList.setMaximumSize(new java.awt.Dimension(300, 2147483647));
-        downloadModsList.setMinimumSize(new java.awt.Dimension(300, 16));
-        downloadModsList.setPreferredSize(new java.awt.Dimension(300, 16));
+        downloadModsList.setMaximumSize(new java.awt.Dimension(350, 600));
+        downloadModsList.setMinimumSize(new java.awt.Dimension(350, 300));
+        downloadModsList.setPreferredSize(new java.awt.Dimension(350, 314));
         modulesList.setViewportView(downloadModsList);
+
+        pathLabel.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
+        pathLabel.setForeground(pathLabelColor());
+        pathLabel.setText("Path:");
+
+        path.setText(ctx.init.getPath());
+        path.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                checkPathChange(evt);
+            }
+        });
+
+        selectPath.setText("Select");
+        selectPath.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSelectActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout installLayout = new javax.swing.GroupLayout(install);
         install.setLayout(installLayout);
@@ -372,19 +468,31 @@ public class LoaderFrame extends javax.swing.JFrame {
             .addGroup(installLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(installLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(downloadLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(downloadProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, installLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(buttonInstall, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(modulesList, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(installLayout.createSequentialGroup()
+                        .addGroup(installLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(downloadLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(downloadProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, installLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(buttonInstall, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(modulesList, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(installLayout.createSequentialGroup()
+                        .addComponent(pathLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(path)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(selectPath)))
                 .addContainerGap())
         );
         installLayout.setVerticalGroup(
             installLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(installLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGroup(installLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(path, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pathLabel)
+                    .addComponent(selectPath))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(installLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(installLayout.createSequentialGroup()
                         .addComponent(downloadLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -392,30 +500,44 @@ public class LoaderFrame extends javax.swing.JFrame {
                         .addComponent(downloadProgress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(buttonInstall)
-                        .addGap(0, 256, Short.MAX_VALUE))
-                    .addComponent(modulesList))
+                        .addGap(0, 227, Short.MAX_VALUE))
+                    .addComponent(modulesList, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
         tabs.addTab("Install", install);
+
+        gameState.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
+        gameState.setForeground(modulesStatusColor());
+        gameState.setText(gameStatusMesage());
+
+        exitCheckBox.setSelected(true);
+        exitCheckBox.setText("Exit launcher");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(userNameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
-                    .addComponent(passwordLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(userName)
-                    .addComponent(password))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(buttonStart)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(userNameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
+                            .addComponent(passwordLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(userName, javax.swing.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE)
+                            .addComponent(password))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(exitCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(buttonStart))
+                            .addComponent(gameState, javax.swing.GroupLayout.PREFERRED_SIZE, 334, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(tabs))
                 .addContainerGap())
-            .addComponent(tabs, javax.swing.GroupLayout.Alignment.TRAILING)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -425,12 +547,14 @@ public class LoaderFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(userNameLabel)
-                    .addComponent(userName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(userName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(gameState))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(buttonStart)
                     .addComponent(passwordLabel)
-                    .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(password, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(exitCheckBox))
                 .addContainerGap())
         );
 
@@ -449,6 +573,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         if (!newPath.equals(ctx.init.getPath())) {
             ctx.init.updatePath(newPath);
         }
+        ctx.exitLauncher = exitCheckBox.isSelected();
         this.setVisible(false);
         this.dispose();
         ctx.wakeUp();
@@ -456,9 +581,19 @@ public class LoaderFrame extends javax.swing.JFrame {
 
     private void checkPathChange(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_checkPathChange
         final String gamePath = path.getText();
-        gameCheckCache = gamePath != null && check.check(gamePath);
+        pathExists = check.checkInstallDir(gamePath);
+        gameCheckCache = pathExists && gamePath != null && check.check(gamePath);
+        installationState = GameState.gameState(pathExists, gameCheckCache, ctx.modsToFix.isEmpty());
+        if (installationState == GameState.OK || installationState == GameState.MODULES) {
+            ctx.checkModules(gamePath);
+            installationState = GameState.gameState(pathExists, gameCheckCache, ctx.modsToFix.isEmpty());
+        }
         pathLabel.setForeground(pathLabelColor());
+        gameState.setForeground(modulesStatusColor());
+        gameState.setText(gameStatusMesage());
         buttonStart.setEnabled(startEnabled());
+        buttonInstall.setEnabled(installEnabled());
+        downloadModsList.setText(modulesToInstallText());
     }//GEN-LAST:event_checkPathChange
 
     private void checkUserChange(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_checkUserChange
@@ -474,8 +609,28 @@ public class LoaderFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_checkPasswordChange
 
     private void buttonInstallActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonInstallActionPerformed
+        installer = initDownloader();
         installer.start();
     }//GEN-LAST:event_buttonInstallActionPerformed
+
+    private void buttonSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSelectActionPerformed
+        directoryChooser.setCurrentDirectory(new File(path.getText()));
+        final int status = directoryChooser.showOpenDialog(this);
+        if (status == JFileChooser.APPROVE_OPTION) {
+            File directory = directoryChooser.getSelectedFile();
+            if (directory != null && directory.isDirectory()) {
+                String dirStr = directory.getAbsolutePath();
+                path.setText(dirStr);
+                pathExists = check.checkInstallDir(dirStr);
+                gameCheckCache = pathExists && dirStr != null && check.check(dirStr);
+                installationState = GameState.gameState(pathExists, gameCheckCache, ctx.modsToFix.isEmpty());
+                pathLabel.setForeground(pathLabelColor());
+                buttonStart.setEnabled(startEnabled());
+                gameState.setForeground(modulesStatusColor());
+                gameState.setText(gameStatusMesage());
+            }
+        }
+    }//GEN-LAST:event_buttonSelectActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     javax.swing.JButton buttonInstall;
@@ -483,15 +638,17 @@ public class LoaderFrame extends javax.swing.JFrame {
     javax.swing.JLabel downloadLabel;
     private javax.swing.JTextPane downloadModsList;
     javax.swing.JProgressBar downloadProgress;
+    private javax.swing.JCheckBox exitCheckBox;
     private javax.swing.JPanel game;
+    private javax.swing.JLabel gameState;
     private javax.swing.JPanel install;
     private javax.swing.JScrollPane modulesList;
-    private javax.swing.JLabel modulesState;
     private javax.swing.JPasswordField password;
     private javax.swing.JLabel passwordLabel;
     private javax.swing.JTextField path;
     private javax.swing.JLabel pathLabel;
     private javax.swing.JLabel picture;
+    private javax.swing.JButton selectPath;
     private javax.swing.JTabbedPane tabs;
     private javax.swing.JTextField userName;
     private javax.swing.JLabel userNameLabel;
