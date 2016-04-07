@@ -1,7 +1,7 @@
 /*
  * (C) 2016 Tomas Kraus
  */
-package mc.ui.loader;
+package mc.utils;
 
 import java.io.File;
 

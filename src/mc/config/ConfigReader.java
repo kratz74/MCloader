@@ -4,7 +4,6 @@
 package mc.config;
 
 import com.fasterxml.jackson.core.JsonToken;
-import java.io.File;
 import java.io.IOException;
 import mc.json.JsonReader;
 import mc.log.LogLevel;
@@ -16,16 +15,21 @@ import mc.log.Logger;
  */
 public class ConfigReader extends JsonReader<LoaderConfig> {
 
+    /** Loader configuration file name. */
+    private static final String CONFIG_FILE = "loader.json";
+
+    /** Loader configuration file path on class path. */
+    private static final String CONFIG_RESOURCE_PATH = "/mc/config/" + CONFIG_FILE;
+    
     /**
      * Reads loader configuration file.
-     * @param file Loader configuration file to be read.
      * @return Configuration file content as {@link LoaderConfig} instance.
      */
-    public static LoaderConfig read(final String file) { 
+    public static LoaderConfig read() { 
 	ConfigReader r = null;
 	try {
-            Logger.log(LogLevel.FINE, "Reading configuration file: %s", file);
-	    r = new ConfigReader(new File(file));
+            Logger.log(LogLevel.FINE, "Reading configuration resource: %s", CONFIG_RESOURCE_PATH);
+	    r = new ConfigReader(CONFIG_RESOURCE_PATH);
 	    r.parse();
 	} catch (IOException ioe) {
             Logger.log(LogLevel.WARNING, "Error reading configuration file: %s", ioe);
@@ -39,11 +43,11 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
 
     /**
      * Creates an instance of loader configuration parser.
-     * @param file File to be parsed.
+     * @param resource Loader configuration file path on class path.
      * @throws java.io.IOException when JSON parser cannot be initialized.
      */
-    public ConfigReader(final File file) throws IOException {
-        super(file, new LoaderConfig());
+    public ConfigReader(final String resource) throws IOException {
+        super(ConfigReader.class.getResourceAsStream(resource), new LoaderConfig());
     }
 
     /**

@@ -12,7 +12,7 @@ import java.util.zip.Adler32;
 import mc.config.LoaderConfig;
 import mc.log.LogLevel;
 import mc.log.Logger;
-import mc.ui.loader.FileUtils;
+import mc.utils.FileUtils;
 
 /**
  * Check whether game is installed in specified path.
@@ -22,15 +22,10 @@ public class GameCheck {
     /** Internal buffer size. */
     private static final int BUFFER_SIZE = 0x7FFF;    
 
-    /** Loader configuration object. */
-    final LoaderConfig config;
-
     /**
      * Creates a new instance game check.
-     * @param config Loader configuration data.
      */
-    public GameCheck(final LoaderConfig config) {
-        this.config = config;
+    public GameCheck() {
     }
 
     public static long adler32(final File file, final byte[] extBuff) {
@@ -101,7 +96,7 @@ public class GameCheck {
      */
     private boolean checkClassPath(final String path) {
         boolean cpOk = true;
-        final LinkedList<String> cp = config.getClassPath();
+        final LinkedList<String> cp = LoaderConfig.getClassPath();
         for (final String item : cp) {
             final File cpFile = new File(FileUtils.fullPath(path, item));
             if (!cpFile.isFile() || !cpFile.canRead()) {

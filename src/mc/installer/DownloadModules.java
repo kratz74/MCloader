@@ -12,7 +12,7 @@ import mc.config.LoaderConfig;
 import mc.log.LogLevel;
 import mc.log.Logger;
 import mc.ui.loader.DownloadListener;
-import mc.ui.loader.FileUtils;
+import mc.utils.FileUtils;
 
 /**
  * Download all game modules targeted for being downloaded.

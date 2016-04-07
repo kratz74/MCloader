@@ -15,7 +15,7 @@ import java.util.zip.ZipInputStream;
 import mc.log.LogLevel;
 import mc.log.Logger;
 import mc.ui.loader.DownloadListener;
-import mc.ui.loader.FileUtils;
+import mc.utils.FileUtils;
 
 /**
  * Download game base file and extract it.

@@ -45,10 +45,9 @@ public class Replace {
      /**
      * Process source {@link String} and get new {@link String} with all keywords expanded.
      * @param src  {@link String} to be processed.
-     * @param init Internal state of state machine.
      * @return {@link String} with all keywords expanded.
      */
-    public static String expand(final String src, final LoaderInit init) {
+    public static String expand(final String src) {
         if (src == null) {
             return null;
         }
@@ -112,10 +111,10 @@ public class Replace {
                             String kw = src.substring(lastPos + 1, pos).toLowerCase();
                             switch (kw) {
                                 case "path":
-                                    dst.append(init.getPath());
+                                    dst.append(LoaderInit.getPath());
                                     break;
                                 case "user":
-                                    dst.append(init.getUserName());
+                                    dst.append(LoaderInit.getUserName());
                                     break;
                                 case "password":
                                     dst.append("TODO:password");

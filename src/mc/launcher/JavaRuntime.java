@@ -7,48 +7,20 @@ import java.io.File;
 import java.io.FileFilter;
 import mc.log.LogLevel;
 import mc.log.Logger;
+import mc.utils.OS;
 
 /**
  * Java runtime for executing a new process.
  */
 public class JavaRuntime {
 
-    /** Logger. */
-    private static final Logger LOG = Logger.getInstance();
-
-    private enum OS {
-        UNIX,
-        MAC,
-        WIN;
-
-        /**
-         * Return {@link OS} for specified OS name.
-         * @return {@link OS} for specified OS name.
-         */
-        private static OS get(final String osName) {
-            final String osLc = osName.toLowerCase();
-            if (osName.startsWith("windows")) {
-                return WIN;
-            } else if (osName.startsWith("mac")) {
-                return MAC;
-            } else {
-                return UNIX;
-            }
-        }
-
-    }
-
     /** {@link FileFilter} for {@code bin} subdirectory. */
     private static class JavaBinDirFilter implements FileFilter {
-
-        /** Host operating system. */
-        private final OS os;
 
         /**
          * Creates an instance of Java runtime bin directory filter.
          */
-        private JavaBinDirFilter(final OS os) {
-            this.os = os;
+        private JavaBinDirFilter() {
         }
 
         /**
@@ -59,7 +31,7 @@ public class JavaRuntime {
         @Override
         public boolean accept(File pathname) {
             if (pathname.isDirectory()) {
-                switch(os) {
+                switch(OS.os) {
                     case UNIX: return "bin".equals(pathname.getName());
                     case MAC:
                     case WIN:  return "bin".equals(pathname.getName().toLowerCase());
@@ -76,14 +48,10 @@ public class JavaRuntime {
     /** {@link FileFilter} for {@code java} executable. */
     private static class JavaExecFilter implements FileFilter {
 
-        /** Host operating system. */
-        private final OS os;
-
         /**
          * Creates an instance of Java executable filter.
          */
-        private JavaExecFilter(final OS os) {
-            this.os = os;
+        private JavaExecFilter() {
         }
 
         /**
@@ -94,7 +62,7 @@ public class JavaRuntime {
         @Override
         public boolean accept(File pathname) {
             if (pathname.isFile() && pathname.canExecute()) {
-                switch(os) {
+                switch(OS.os) {
                     case UNIX: 
                     case MAC:  return "java".equals(pathname.getName());
                     case WIN:  return "java.exe".equals(pathname.getName().toLowerCase());
@@ -111,30 +79,29 @@ public class JavaRuntime {
     /**
      * Find Java executable under Java home for specified OS.
      * @param javaHome Java home
-     * @param os       Host operating system.
      * @return Java executable under Java home for specified OS or {@code null} if executable was not found.
      */
-    private static File findJavaExec(final String javaHome, OS os) {
+    private static File findJavaExec(final String javaHome) {
         File fHome = new File(javaHome);
         if (fHome.isDirectory()) {
             // Currently it checks physical directory structure under Java home for bin/java[.exe]
-            final File[] filesList = fHome.listFiles(new JavaBinDirFilter(os));
+            final File[] filesList = fHome.listFiles(new JavaBinDirFilter());
             if (filesList.length > 0) {
                 final File binDir = filesList[0];
-                final File[] execList = binDir.listFiles(new JavaExecFilter(os));
+                final File[] execList = binDir.listFiles(new JavaExecFilter());
                 if (execList.length > 0) {
-                    LOG.log(LogLevel.FINE, "Java executable: %s", execList[0].getAbsolutePath());
+                    Logger.log(LogLevel.FINE, "Java executable: %s", execList[0].getAbsolutePath());
                     return execList[0];
                 } else {
-                    LOG.log(LogLevel.WARNING, "Java executable was not found under Java home %s/bin", javaHome);
+                    Logger.log(LogLevel.WARNING, "Java executable was not found under Java home %s/bin", javaHome);
                     return null;
                 }
             } else {
-                LOG.log(LogLevel.WARNING, "Directory bin was not found under Java home %s", javaHome);
+                Logger.log(LogLevel.WARNING, "Directory bin was not found under Java home %s", javaHome);
                 return null;
             }
         } else {
-            LOG.log(LogLevel.WARNING, "Java home %s is not an existing directory", javaHome);
+            Logger.log(LogLevel.WARNING, "Java home %s is not an existing directory", javaHome);
             return null;
         }
         
@@ -143,9 +110,6 @@ public class JavaRuntime {
     /** Java home. */ 
     private final String home;
 
-    /** Host operating system. */
-    private final OS os;
-
     /** Java executable. */
     private final File java;
 
@@ -153,9 +117,8 @@ public class JavaRuntime {
      * Creates new Java runtime for executing a new process using current VM Java home.
      */
     public JavaRuntime() {
-        os = OS.get(System.getProperty("os.name"));
         home = System.getProperty("java.home");
-        java = findJavaExec(home, os);
+        java = findJavaExec(home);
     }
 
     /**

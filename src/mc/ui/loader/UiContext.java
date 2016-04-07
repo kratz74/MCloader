@@ -15,12 +15,6 @@ import mc.installer.GameCheck;
  */
 public class UiContext {
 
-    /** Loader initialization object. */
-    final LoaderInit init;
-
-    /** Loader configuration object. */
-    final LoaderConfig config;
-
     /** Game modules that are not OK. */
     LinkedList<LoaderConfig.Mod> modsToFix;
 
@@ -29,13 +23,10 @@ public class UiContext {
     
     /**
      * Creates a new instance of UI context.
-     * @param init   Loader initialization data.
-     * @param config Loader configuration data.
      */
-    public UiContext(final LoaderInit init, final LoaderConfig config) {
-        this.init = init;
-        this.config = config;
-        this.modsToFix = GameCheck.checkModules(init.getPath(), config.getModsPath(), config.getMods());
+    public UiContext() {
+        this.modsToFix = GameCheck.checkModules(
+                LoaderInit.getPath(), LoaderConfig.getModsPath(), LoaderConfig.getMods());
         this.exitLauncher = false;
     }
 
@@ -52,7 +43,7 @@ public class UiContext {
      * UI synchronization: Wait for UI to finish.
      * @param ctx Loader UI context.
      */
-    void waitForUi() {
+    public void waitForUi() {
         synchronized(this) {
             try {
                 this.wait();
@@ -78,7 +69,8 @@ public class UiContext {
         if (this.modsToFix != null) {
             this.modsToFix.clear();
         }
-        this.modsToFix = GameCheck.checkModules(init.getPath(), config.getModsPath(), config.getMods());
+        this.modsToFix = GameCheck.checkModules(
+                LoaderInit.getPath(), LoaderConfig.getModsPath(), LoaderConfig.getMods());
     }
 
     /**
@@ -90,7 +82,7 @@ public class UiContext {
         if (this.modsToFix != null) {
             this.modsToFix.clear();
         }
-        this.modsToFix = GameCheck.checkModules(path, config.getModsPath(), config.getMods());
+        this.modsToFix = GameCheck.checkModules(path, LoaderConfig.getModsPath(), LoaderConfig.getMods());
     }
 
     /**

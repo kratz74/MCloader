@@ -6,7 +6,7 @@ package mc.config;
 import java.util.LinkedList;
 import mc.log.LogLevel;
 import mc.log.Logger;
-import mc.ui.loader.FileUtils;
+import mc.utils.FileUtils;
 
 /**
  * Loader configuration.
@@ -81,6 +81,74 @@ public class LoaderConfig {
 	}
     }
 
+    /** Loader configuration instance. Configuration data are stored in static context for whole application. */
+    private static final LoaderConfig CONFIG = ConfigReader.read();
+
+    /**
+     * Get Java options list.
+     * @return Java options list.
+     */
+    public static LinkedList<Property> getJavaOptions() {
+        return CONFIG.javaOptions;
+    }
+
+    /**
+     * Get Java properties list.
+     * @return Java properties list.
+     */
+    public static LinkedList<Property> getProperties() {
+        return CONFIG.properties;
+    }
+
+    /**
+     * Get ClassPath list.
+     * @return ClassPath list.
+     */
+    public static LinkedList<String> getClassPath() {
+        return CONFIG.classpath;
+    }
+
+    /**
+     * Get game base package URL.
+     * @return Game base package URL
+     */
+    public static String getGameUrl() {
+        return CONFIG.gameUrl;
+    }
+
+    /**
+     * Get modules path under game root directory.
+     * @return Modules path under game root directory.
+     */
+    public static String getModsPath() {
+        return CONFIG.modsPath;
+    }
+
+    /**
+     * Get Main class startup arguments list.
+     * @return Main class startup arguments list.
+     */
+    public static LinkedList<Argument> getArguments() {
+        return CONFIG.arguments;
+    }
+
+    /**
+     * Get modules list.
+     * @return Modules list.
+     * @retrn Modules list.
+     */
+    public static LinkedList<Mod> getMods() {
+	return CONFIG.mods;
+    }
+
+    /**
+     * Get startup class name.
+     * @return Startup class name.
+     */
+    public static String getStartupClass() {
+        return CONFIG.startupClass;
+    }
+
     /** Java options list. */
     private final LinkedList<Property> javaOptions;
 
@@ -127,27 +195,11 @@ public class LoaderConfig {
     }
 
     /**
-     * Get Java options list.
-     * @return Java options list.
-     */
-    public LinkedList<Property> getJavaOptions() {
-        return javaOptions;
-    }
-
-    /**
      * Add new element at the end of Java properties list.
      * @param property Java property to be added at the end of the list.
      */
     void addProperty(final Property property) {
 	properties.addLast(property);
-    }
-
-    /**
-     * Get Java properties list.
-     * @return Java properties list.
-     */
-    public LinkedList<Property> getProperties() {
-        return properties;
     }
 
     /**
@@ -159,35 +211,11 @@ public class LoaderConfig {
     }
 
     /**
-     * Get ClassPath list.
-     * @return ClassPath list.
-     */
-    public LinkedList<String> getClassPath() {
-        return classpath;
-    }
-
-    /**
-     * Get game base package URL.
-     * @return Game base package URL
-     */
-    public String getGameUrl() {
-        return gameUrl;
-    }
-
-    /**
      * Set game base package URL.
      * @param gameUrl Game base package URL.
      */
     void setGameUrl(final String gameUrl) {
         this.gameUrl = gameUrl;
-    }
-
-    /**
-     * Get modules path under game root directory.
-     * @return Modules path under game root directory.
-     */
-    public String getModsPath() {
-        return modsPath;
     }
 
     /**
@@ -207,23 +235,6 @@ public class LoaderConfig {
     }
 
     /**
-     * Get Main class startup arguments list.
-     * @return Main class startup arguments list.
-     */
-    public LinkedList<Argument> getArguments() {
-        return arguments;
-    }
-
-    /**
-     * Get modules list.
-     * @return Modules list.
-     * @retrn Modules list.
-     */
-    public LinkedList<Mod> getMods() {
-	return mods;
-    }
-
-    /**
      * Add new element at the end of modules list.
      * @param file   Module file name.
      * @param chkSum Module file checksum (Adler32).
@@ -231,14 +242,6 @@ public class LoaderConfig {
      */
     void addMod(final String file, final String chkSum, final String url) {
 	mods.addLast(new Mod(file, chkSum, url));
-    }
-
-    /**
-     * Get startup class name.
-     * @return Startup class name.
-     */
-    public String getStartupClass() {
-        return startupClass;
     }
 
     /**

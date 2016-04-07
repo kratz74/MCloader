@@ -39,13 +39,11 @@ public class JavaExecutor {
      * Add Java options into specified execution arguments list.
      * @param arguments   Target execution arguments list.
      * @param javaOptions Java options list.
-     * @param init        Loader initialization data.
      */
-    private static void addOptions(final LinkedList<String> arguments,
-            final LinkedList<Property> javaOptions, final LoaderInit init) {
+    private static void addOptions(final LinkedList<String> arguments, final LinkedList<Property> javaOptions) {
         for (Property property: javaOptions) {
             final String name = property.getName();
-            final String value = Replace.expand(property.getValue(), init);
+            final String value = Replace.expand(property.getValue());
             final int len = name.length() + JAVA_OPTION_PREFIX.length()
                     + (value != null ? value.length() + JAVA_OPTION_ASSIGN.length() : 0);
             final StringBuilder sb = new StringBuilder(len);
@@ -68,13 +66,11 @@ public class JavaExecutor {
      * Add Java properties into specified execution arguments list.
      * @param arguments  Target execution arguments list.
      * @param properties Java properties list.
-     * @param init       Loader initialization data.
      */
-    private static void addProperties(final LinkedList<String> arguments,
-            final LinkedList<Property> properties, final LoaderInit init) {
+    private static void addProperties(final LinkedList<String> arguments, final LinkedList<Property> properties) {
         for (Property property: properties) {
             final String name = property.getName();
-            final String value = Replace.expand(property.getValue(), init);
+            final String value = Replace.expand(property.getValue());
             final int len = name.length() + JAVA_PROPERTY_PREFIX.length()
                     + (value != null ? value.length() + JAVA_PROPERTY_ASSIGN.length() : 0);
             final StringBuilder sb = new StringBuilder(len);
@@ -97,11 +93,9 @@ public class JavaExecutor {
      * Add Java class path into specified execution arguments list.
      * @param arguments Target execution arguments list.
      * @param classpath Java class path list.
-     * @param init      Loader initialization data.
     */
-    private static void addClassPath(final LinkedList<String> arguments,
-            final LinkedList<String> classpath, final LoaderInit init) {
-        final String path = init.getPath();
+    private static void addClassPath(final LinkedList<String> arguments, final LinkedList<String> classpath) {
+        final String path = LoaderInit.getPath();
         final int pathLen = path.length();
         final int sepLength = File.separator.length();
         final int pSepLen = File.pathSeparator.length();
@@ -155,13 +149,11 @@ public class JavaExecutor {
      * Add Java properties into specified execution arguments list.
      * @param arguments Target execution arguments list.
      * @param classArgs Java main class arguments list.
-     * @param init      Loader initialization data.
     */
-    private static void addArguments(final LinkedList<String> arguments,
-            final LinkedList<Argument> classArgs, final LoaderInit init) {
+    private static void addArguments(final LinkedList<String> arguments, final LinkedList<Argument> classArgs) {
         for (Argument arg : classArgs) {
             final String name = arg.getName();
-            final String value = Replace.expand(arg.getValue(), init);
+            final String value = Replace.expand(arg.getValue());
             final int len = name.length() + CLASS_ARG_PREFIX.length();
             final StringBuilder sb = new StringBuilder(len);
             sb.append(CLASS_ARG_PREFIX);
@@ -197,23 +189,20 @@ public class JavaExecutor {
     
     /**
      * Build process execution arguments.
-     * @param config      Loader configuration data.
      * @param javaRuntime Java runtime for executing a new process.
-     * @param init        Loader initialization data.
      * @return {@link String} array with process execution arguments.
      */
-    private static String[] buildArguments(final LoaderConfig config,
-            final JavaRuntime javaRuntime, final LoaderInit init) {
+    private static String[] buildArguments(final JavaRuntime javaRuntime) {
         final LinkedList<String> args = new LinkedList<>();
         // Add Java executable.
         final File javaExec = javaRuntime.getJava();
         if (javaExec != null) {
             args.add(javaExec.getAbsolutePath());
-            addOptions(args, config.getJavaOptions(), init);
-            addProperties(args, config.getProperties(), init);
-            addClassPath(args, config.getClassPath(), init);
-            addMainClass(args, config.getStartupClass());
-            addArguments(args, config.getArguments(), init);
+            addOptions(args, LoaderConfig.getJavaOptions());
+            addProperties(args, LoaderConfig.getProperties());
+            addClassPath(args, LoaderConfig.getClassPath());
+            addMainClass(args, LoaderConfig.getStartupClass());
+            addArguments(args, LoaderConfig.getArguments());
             return listToArray(args);
         } else {
             Logger.log(LogLevel.FATAL, "Java executable is not available");
@@ -229,12 +218,10 @@ public class JavaExecutor {
     
     /**
      * Creates an empty instance of Java VM executor.
-     * @param init Loader initialization data.
-     * @param config Loader configuration data.
      */
-    public JavaExecutor(final LoaderInit init, final LoaderConfig config) {
-        this.execArgs = buildArguments(config, new JavaRuntime(), init);
-        this.path = new File(init.getPath());
+    public JavaExecutor() {
+        this.execArgs = buildArguments(new JavaRuntime());
+        this.path = new File(LoaderInit.getPath());
         for (String arg : execArgs) {
             Logger.log(LogLevel.FINEST, 1, "Exec: %s", arg);
         }

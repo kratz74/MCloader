@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import mc.log.LogLevel;
 import mc.log.Logger;
 
@@ -18,9 +19,6 @@ import mc.log.Logger;
  * @param <T> JSON data structure.
  */
 public abstract class JsonReader<T> implements Closeable {
-
-    /** Logger. */
-    private static final Logger LOG = Logger.getInstance();
 
     /** JSON parser factory. */
     protected static JsonFactory factory = new JsonFactory();
@@ -45,6 +43,18 @@ public abstract class JsonReader<T> implements Closeable {
      */
     public JsonReader(final File file, final T data) throws IOException {
         parser = factory.createParser(file);
+	this.data = data;
+	parsingDone = false;
+    }
+
+    /**
+     * Creates an instance of loader configuration parser.
+     * @param is   {@link InputStream} to be parsed.
+     * @param data JSON data structure instance.
+     * @throws java.io.IOException when JSON parser cannot be initialized.
+     */
+    public JsonReader(InputStream is, final T data) throws IOException {
+        parser = factory.createParser(is);
 	this.data = data;
 	parsingDone = false;
     }
@@ -84,7 +94,7 @@ public abstract class JsonReader<T> implements Closeable {
 	try {
             parser.close();
 	} catch (IOException ioe) {
-	    LOG.log(LogLevel.WARNING, "Error closing file: %s", ioe);
+	    Logger.log(LogLevel.WARNING, "Error closing file: %s", ioe);
 	}
     }
 

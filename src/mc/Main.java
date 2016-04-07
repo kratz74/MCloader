@@ -1,16 +1,16 @@
 /*
  * (C) 2016 Tomas Kraus
  */
-package mc.ui.loader;
+package mc;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import mc.config.ConfigReader;
-import mc.config.LoaderConfig;
 import mc.init.LoaderInit;
 import mc.launcher.JavaExecutor;
+import mc.ui.loader.LoaderFrame;
+import mc.ui.loader.UiContext;
 
 /**
  * Main application class.
@@ -26,9 +26,7 @@ public class Main {
     @SuppressWarnings("SleepWhileInLoop")
     public static void main(String[] args) {
         Thread.currentThread().setName(THREAD_NAME);
-        final LoaderInit init = LoaderInit.create("/data/CMloader/src/mc/init");
-        final LoaderConfig config = ConfigReader.read("/data/CMloader/src/mc/config/loader.json");
-        final UiContext uiCtx = new UiContext(init, config);
+        final UiContext uiCtx = new UiContext();
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
@@ -37,8 +35,8 @@ public class Main {
             }
         });
         uiCtx.waitForUi();
-        LoaderInit.persist("/data/CMloader/src/mc/init", init);
-        JavaExecutor executor = new JavaExecutor(init, config);
+        LoaderInit.persist();
+        JavaExecutor executor = new JavaExecutor();
         Process p = executor.exec();
 
         if (uiCtx.getExitGame())

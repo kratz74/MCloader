@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import mc.config.LoaderConfig;
+import mc.init.LoaderInit;
 import mc.installer.DownloadBase;
 import mc.installer.DownloadModules;
 import mc.installer.Downloader;
@@ -138,10 +139,10 @@ public class LoaderFrame extends javax.swing.JFrame {
      */
     public LoaderFrame(final UiContext ctx) {
         this.ctx = ctx;
-        check = new GameCheck(ctx.config);
-        pathExists = check.checkInstallDir(ctx.init.getPath());
-        gameCheckCache = pathExists && ctx.init.getPath() != null && check.check(ctx.init.getPath());
-        userCheckCache = checkUserName(ctx.init.getUserName());
+        check = new GameCheck();
+        pathExists = check.checkInstallDir(LoaderInit.getPath());
+        gameCheckCache = pathExists && LoaderInit.getPath() != null && check.check(LoaderInit.getPath());
+        userCheckCache = checkUserName(LoaderInit.getUserName());
         passCheckCache = false;
         installationState = GameState.gameState(pathExists, gameCheckCache, ctx.modsToFix.isEmpty());
         logoPicure = readImage("/data/CMloader/src/mc/launcher/thaumcraft.png");
@@ -313,9 +314,9 @@ public class LoaderFrame extends javax.swing.JFrame {
         switch(installationState) {
             case NO_PATH:
             case INSTALL: return new DownloadBase(
-                    path.getText(), ctx.config.getGameUrl(), new BaseDownloadListener(this));
+                    path.getText(), LoaderConfig.getGameUrl(), new BaseDownloadListener(this));
             case MODULES: return new DownloadModules(
-                    path.getText(), ctx.config.getModsPath(), ctx.modsToFix, new ModuleDownloadListener(this));
+                    path.getText(), LoaderConfig.getModsPath(), ctx.modsToFix, new ModuleDownloadListener(this));
             case OK: return null;
             default: throw new IllegalStateException("Unknown game installation state");
         }
@@ -371,7 +372,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         setMaximumSize(new java.awt.Dimension(800, 600));
         setMinimumSize(new java.awt.Dimension(640, 480));
 
-        userName.setText(ctx.init.getUserName());
+        userName.setText(LoaderInit.getUserName());
         userName.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 checkUserChange(evt);
@@ -447,7 +448,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         pathLabel.setForeground(pathLabelColor());
         pathLabel.setText("Path:");
 
-        path.setText(ctx.init.getPath());
+        path.setText(LoaderInit.getPath());
         path.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 checkPathChange(evt);
@@ -566,12 +567,12 @@ public class LoaderFrame extends javax.swing.JFrame {
 
     private void buttonStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonStartActionPerformed
         String newUserName = userName.getText();
-        if (!newUserName.equals(ctx.init.getUserName())) {
-            ctx.init.updateUserName(newUserName);
+        if (!newUserName.equals(LoaderInit.getUserName())) {
+            LoaderInit.updateUserName(newUserName);
         }
         String newPath = path.getText();
-        if (!newPath.equals(ctx.init.getPath())) {
-            ctx.init.updatePath(newPath);
+        if (!newPath.equals(LoaderInit.getPath())) {
+            LoaderInit.updatePath(newPath);
         }
         ctx.exitLauncher = exitCheckBox.isSelected();
         this.setVisible(false);
