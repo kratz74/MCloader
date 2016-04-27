@@ -135,7 +135,6 @@ public class LoaderConfig {
     /**
      * Get modules list.
      * @return Modules list.
-     * @retrn Modules list.
      */
     public static LinkedList<Mod> getMods() {
 	return CONFIG.mods;

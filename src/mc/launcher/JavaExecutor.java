@@ -42,22 +42,24 @@ public class JavaExecutor {
      */
     private static void addOptions(final LinkedList<String> arguments, final LinkedList<Property> javaOptions) {
         for (Property property: javaOptions) {
-            final String name = property.getName();
-            final String value = Replace.expand(property.getValue());
-            final int len = name.length() + JAVA_OPTION_PREFIX.length()
-                    + (value != null ? value.length() + JAVA_OPTION_ASSIGN.length() : 0);
-            final StringBuilder sb = new StringBuilder(len);
-            sb.append(JAVA_OPTION_PREFIX);
-            sb.append(name);
-            if (value != null) {
-                sb.append(JAVA_OPTION_ASSIGN);
-                sb.append(value);
-            }
-            String option = sb.toString();
-            arguments.add(option);
-            Logger.log(LogLevel.FINEST, "Added java option: %s", option);
-            if (option.length() != len) {
-                Logger.log(LogLevel.WARNING, "Java option length calculation error for %s", option);
+            if (property.isAlowed()) {
+                final String name = property.getName();
+                final String value = Replace.expand(property.getValue());
+                final int len = name.length() + JAVA_OPTION_PREFIX.length()
+                        + (value != null ? value.length() + JAVA_OPTION_ASSIGN.length() : 0);
+                final StringBuilder sb = new StringBuilder(len);
+                sb.append(JAVA_OPTION_PREFIX);
+                sb.append(name);
+                if (value != null) {
+                    sb.append(JAVA_OPTION_ASSIGN);
+                    sb.append(value);
+                }
+                String option = sb.toString();
+                arguments.add(option);
+                Logger.log(LogLevel.FINEST, "Added java option: %s", option);
+                if (option.length() != len) {
+                    Logger.log(LogLevel.WARNING, "Java option length calculation error for %s", option);
+                }
             }
         }
     }

@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -18,6 +19,7 @@ import mc.init.LoaderInit;
 import mc.installer.DownloadBase;
 import mc.installer.DownloadModules;
 import mc.installer.Downloader;
+import mc.utils.PasswordUtils;
 
 /**
  *
@@ -63,15 +65,31 @@ public class LoaderFrame extends javax.swing.JFrame {
         }
     };
 
+    /** Logo image file packaged in JAR. */
+    private static final String LOGO_FILE = "/mc/ui/loader/thaumcraft.png";
+
     /** Dark red color. */
     private static final Color DARK_RED = new java.awt.Color(0x68, 0, 0);
+
+    /**
+     * Retrieve decrypted password as {@link String}.
+     * @return Decrypted password from loader initialization object.
+     */
+    private static String getPassword() {
+        final String password = LoaderInit.getUserPassword();
+        if (password == null) {
+            return null;
+        } else { 
+            return new String(PasswordUtils.decrypt(password));
+        }
+    }
 
     /**
      * Load image bitmap.
      */
     private static BufferedImage readImage(final String file) {
         try {
-            return ImageIO.read(new File(file));
+            return ImageIO.read(LoaderFrame.class.getResourceAsStream(LOGO_FILE));
         } catch (IOException ex) {
             Logger.log(LogLevel.WARNING, "Could not read image %s", file);
             return null;        
@@ -84,6 +102,20 @@ public class LoaderFrame extends javax.swing.JFrame {
      */
     private static boolean checkUserName(final String userName) {
         return userName != null && userName.length() > 2;
+    }
+
+    /**
+     * Validate user password length from encrypted password.
+     * @return Value of {@code true} when user password is valid or {@code false} otherwise.
+     */
+    private static boolean checkUserPassword(final String userPassword) {
+        if (userPassword == null) {
+            return false;
+        }
+        final char[] password = PasswordUtils.decrypt(userPassword);
+        final boolean valid = password != null && password.length > 2;
+        Arrays.fill(password, '\u0000');
+        return valid;
     }
 
     /**
@@ -143,7 +175,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         pathExists = check.checkInstallDir(LoaderInit.getPath());
         gameCheckCache = pathExists && LoaderInit.getPath() != null && check.check(LoaderInit.getPath());
         userCheckCache = checkUserName(LoaderInit.getUserName());
-        passCheckCache = false;
+        passCheckCache = checkUserPassword(LoaderInit.getUserPassword());
         installationState = GameState.gameState(pathExists, gameCheckCache, ctx.modsToFix.isEmpty());
         logoPicure = readImage("/data/CMloader/src/mc/launcher/thaumcraft.png");
         directoryChooser = createDirectoryChooser();
@@ -396,6 +428,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         passwordLabel.setForeground(passwLabelColor());
         passwordLabel.setText("Password:");
 
+        password.setText(getPassword());
         password.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 checkPasswordChange(evt);
@@ -569,6 +602,10 @@ public class LoaderFrame extends javax.swing.JFrame {
         String newUserName = userName.getText();
         if (!newUserName.equals(LoaderInit.getUserName())) {
             LoaderInit.updateUserName(newUserName);
+        }
+        String newPassword = PasswordUtils.encrypt(password.getPassword());
+        if (!newPassword.equals(LoaderInit.getUserPassword())) {
+            LoaderInit.updateUserPassword(newPassword);
         }
         String newPath = path.getText();
         if (!newPath.equals(LoaderInit.getPath())) {

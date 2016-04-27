@@ -117,7 +117,7 @@ public class Replace {
                                     dst.append(LoaderInit.getUserName());
                                     break;
                                 case "password":
-                                    dst.append("TODO:password");
+                                    dst.append(LoaderInit.getUserPassword());
                                     break;
                                 // Not a keyword.
                                 default:

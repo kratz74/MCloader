@@ -41,7 +41,6 @@ public class UiContext {
 
     /**
      * UI synchronization: Wait for UI to finish.
-     * @param ctx Loader UI context.
      */
     public void waitForUi() {
         synchronized(this) {

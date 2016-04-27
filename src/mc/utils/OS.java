@@ -4,6 +4,8 @@
 package mc.utils;
 
 import java.io.File;
+import java.util.HashMap;
+import mc.log.LogLevel;
 
 /**
  * Operating system type.
@@ -13,6 +15,9 @@ public enum OS {
     UNIX,
     MAC,
     WIN;
+
+    /** Logging levels enumeration length. */
+    public static final int length = OS.values().length;
 
     /** OS type of this host. */
     public static final OS os = OS.getOS(System.getProperty("os.name"));
@@ -27,13 +32,33 @@ public enum OS {
     public static final String initPath = getAppData();
 
     /** Application data subdirectory on modern Windows (7, 8, 10). */
-    private static final String WIN_APPDATA_LOCAL= "AppData/Local";
+    private static final String WIN_APPDATA_LOCAL = "AppData\\Local";
 
     /** Application installation subdirectory on modern Windows (7, 8, 10). */
-    private static final String WIN_APPDATA_ROAMING= "AppData/Roaming";
+    private static final String WIN_APPDATA_ROAMING = "AppData\\Roaming";
 
     /** Application data subdirectory on older Windows (XP). */
-    private static final String WIN_LOCSET_APPDATA = "Local Settings/Application Data";
+    private static final String WIN_LOCSET_APPDATA = "Local Settings\\Application Data";
+
+    /** {@link HashMap} for {@link String} to {@link OS} case insensitive lookup. */
+    private static final HashMap<String, OS> valuesMap = new HashMap<>(2 * length);
+
+    // Initialize String to OS case insensitive lookup Map.
+    static {
+        for (OS osValue : OS.values()) {
+            valuesMap.put(osValue.name().toUpperCase(), osValue);
+        }
+    }
+
+    /**
+     * Returns {@link OS} object corresponding to the value of the specified {@link String}.
+     * @param name The {@link String} to be checked.
+     * @return {@link OS} object corresponding to the value of the string argument or {@code null} when
+     *         there exists no corresponding {@link OS} object to provided {@link String}.
+     */
+    public static final OS toValue(final String name) {
+        return name != null ? valuesMap.get(name.toUpperCase()) : null;
+    }
 
     /**
      * Return {@link OS} for specified OS name.
@@ -42,9 +67,10 @@ public enum OS {
      */
     private static OS getOS(final String osName) {
         final String osLc = osName.toLowerCase();
-        if (osName.startsWith("windows")) {
+        // TODO: Find more effective way.
+        if (osLc.contains("windows")) {
             return WIN;
-        } else if (osName.startsWith("mac")) {
+        } else if (osLc.startsWith("mac")) {
             return MAC;
         } else {
             return UNIX;

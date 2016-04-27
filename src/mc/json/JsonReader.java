@@ -51,7 +51,7 @@ public abstract class JsonReader<T> implements Closeable {
      * Creates an instance of loader configuration parser.
      * @param is   {@link InputStream} to be parsed.
      * @param data JSON data structure instance.
-     * @throws java.io.IOException when JSON parser cannot be initialized.
+     * @throws IOException when JSON parser cannot be initialized.
      */
     public JsonReader(InputStream is, final T data) throws IOException {
         parser = factory.createParser(is);
@@ -61,13 +61,13 @@ public abstract class JsonReader<T> implements Closeable {
 
     /**
      * Parses JSON file.
-     * @throws java.io.IOException
+     * @throws java.io.IOException when there is a problem when reading the file.
      */
     public abstract void parse() throws IOException;
 
     /**
      * Retrieve next token from JSON file.
-     * @throws IOException
+     * @throws IOException when there is a problem when reading the file.
      */
     protected void next() throws IOException {
 	token = parser.nextToken();

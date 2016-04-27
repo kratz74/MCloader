@@ -56,13 +56,14 @@ public class InitWriter implements Closeable {
 
     /**
      * Write JSON file content.
-     * @throws java.io.IOException
+     * @throws IOException when there is a problem with writing the file.
      */
     public void write() throws IOException {
         generator.writeStartObject();
         generator.useDefaultPrettyPrinter();
-        final String path = data.getPath();
-        final String userName = data.getUserName();
+        final String path = LoaderInit.getPath();
+        final String userName = LoaderInit.getUserName();
+        final String userPassword = LoaderInit.getUserPassword();
         if (path != null) {
             generator.writeFieldName("path");
             generator.writeString(path);
@@ -71,6 +72,10 @@ public class InitWriter implements Closeable {
             generator.writeFieldName("userName");
             generator.writeString(userName);
         }
+        if (userPassword != null) {
+            generator.writeFieldName("userPassword");
+            generator.writeString(userPassword);
+        } 
         generator.writeEndObject();
     }
 

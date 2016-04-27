@@ -59,40 +59,57 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
      */
     private Property property() throws IOException {
 	next();
-	if (token != JsonToken.FIELD_NAME) {
-	    throw new IOException("Expected Java option 'name' field name");
-	}
-	String name = parser.getCurrentName();
-	if (!"name".equals(name.toLowerCase())) {
-	    throw new IOException("Field name shall be \"name\"");
-	}
-	next();
-	if (token != JsonToken.VALUE_STRING) {
-	    throw new IOException("Expected 'name' field String value");
-	}
-	String optionName = parser.getText();
-	next();
-	if (token != JsonToken.FIELD_NAME) {
-	    throw new IOException("Expected Java option 'value' field name");
-	}
-	name = parser.getCurrentName();
-	if (!"value".equals(name.toLowerCase())) {
-	    throw new IOException("Field name shall be \"value\"");
-	}
-	next();
-        String value;
-        switch (token) {
-            case VALUE_STRING:
-                value = parser.getText();
-                break;
-            case VALUE_NULL:
-                value = null;
-                break;
-            default:
-                throw new IOException("Expected 'value' field String or null value");
+        String optionName = null;
+        String optionValue = null;
+        String optionOS = null;
+        while (token == JsonToken.FIELD_NAME) {
+            final String name = parser.getCurrentName().toLowerCase();
+            switch(name) {
+                case "name": case "value": case "os": break;
+                default: throw new IOException("Expected Java option or property field name: 'name', 'value', 'os'");
+            }        
+            next();
+            switch(name) {
+                case "name":
+                    if (token != JsonToken.VALUE_STRING) {
+                        throw new IOException("Expected 'name' field String value");
+                    }
+                    optionName = parser.getText();
+                    break;
+                case "value":
+                    switch (token) {
+                        case VALUE_STRING:
+                            optionValue = parser.getText();
+                            break;
+                        case VALUE_NULL:
+                            optionValue = null;
+                            break;
+                        default:
+                            throw new IOException("Expected 'value' field String or null value");
+                    }
+                    break;
+                case "os":
+                    switch (token) {
+                        case VALUE_STRING:
+                            optionOS = parser.getText();
+                            break;
+                        case VALUE_NULL:
+                            optionOS = null;
+                            break;
+                        default:
+                            throw new IOException("Expected 'os' field String or null value");
+                    }
+                    break;
+            }
+            next();
         }
-        Logger.log(LogLevel.FINEST, 2, "Property/option %s = %s", optionName, value != null ? value : "null");
-        return new Property(optionName, value);
+        if (optionName == null) {
+            throw new IOException("Name field is missing in Java option or property");
+        }
+        Logger.log(LogLevel.FINEST, 2, "Property/option %s = %s for %s",
+                optionName, optionValue != null ? optionValue : "N/A", optionOS != null ? optionOS : "all");
+        return optionOS != null
+                ? new Property(optionName, optionValue, optionOS) : new Property(optionName, optionValue);
     }
 
     /**
@@ -110,7 +127,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
 	next();
 	while (token == JsonToken.START_OBJECT) {
 	    final Property option = property();
-	    next();
+	    //next();
 	    if (token != JsonToken.END_OBJECT) {
 		throw new IOException("Expecting array ending symbol '}' after JavaOptions");
 	    }
@@ -138,7 +155,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
 	next();
 	while (token == JsonToken.START_OBJECT) {
 	    final Property property = property();
-	    next();
+	    //next();
 	    if (token != JsonToken.END_OBJECT) {
 		throw new IOException("Expecting array ending symbol '}' after properties");
 	    }
@@ -340,7 +357,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
 
     /**
      * Parses loader configuration.
-     * @throws java.io.IOException
+     * @throws IOException when there is a problem with reading the file.
      */
     @Override
     public void parse() throws IOException {

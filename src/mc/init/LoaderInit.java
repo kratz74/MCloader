@@ -80,11 +80,31 @@ public class LoaderInit {
         INIT.modified = true;
     }
 
+   /**
+     * Get stored encrypted user password.
+     * @return Stored encrypted user password.
+     */
+    public static String getUserPassword() {
+        return INIT.userPassword;
+    }
+
+    /**
+     * Update stored encrypted user password. Object is marked as modified.
+     * @param userPassword Stored encrypted user password to set.
+     */
+    public static void updateUserPassword(String userPassword) {
+        INIT.userPassword = userPassword;
+        INIT.modified = true;
+    }
+
     /** Installation path. */
     private String path;
 
     /** Stored user name. */
     private String userName;
+
+    /** Stored user password (encrypted). */
+    private String userPassword;
 
     /** Content modification indicator. */
     private boolean modified;
@@ -95,6 +115,7 @@ public class LoaderInit {
     LoaderInit() {
 	this.path = null;
         this.userName = null;
+        this.userPassword = null;
         this.modified = false;
     }
 
@@ -105,6 +126,7 @@ public class LoaderInit {
     private LoaderInit(final String path) {
 	this.path = path;
         this.userName = null;
+        this.userPassword = null;
         this.modified = false;
     }
 
@@ -120,9 +142,17 @@ public class LoaderInit {
      * Set stored user name.
      * @param userName Stored user name to set.
      */
-    void setUserName(String userName) {
+    void setUserName(final String userName) {
         this.userName = userName;
     }
 
+
+    /**
+     * Set stored encrypted user password.
+     * @param userName Stored encrypted user password to set.
+     */
+    void setUserPassword(final String userPassword) {
+        this.userPassword = userPassword;
+    }
 
 }

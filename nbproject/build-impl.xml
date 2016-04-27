@@ -853,7 +853,7 @@ is divided into following sections:
     <target name="-init-presetdef-jar">
         <presetdef name="jar" uri="http://www.netbeans.org/ns/j2se-project/1">
             <jar compress="${jar.compress}" index="${jar.index}" jarfile="${dist.jar}">
-                <j2seproject1:fileset dir="${build.classes.dir}" excludes="${dist.archive.excludes}"/>
+                <j2seproject1:fileset dir="${build.classes.dir}" excludes="${dist.archive.excludes}" includes="${dist.archive.includes}"/>
             </jar>
         </presetdef>
     </target>
@@ -938,8 +938,12 @@ is divided into following sections:
         </copy>
     </target>
     <target name="-post-compile">
-        <!-- Empty placeholder for easier customization. -->
-        <!-- You can override this target in the ../build.xml file. -->
+        <unzip dest="${build.classes.dir}" src="${file.reference.jackson-core-2.7.0.jar}">
+            <patternset>
+                <include name="com/**"/>
+                <exclude name="META-INF/**"/>
+            </patternset>            
+        </unzip>
     </target>
     <target depends="init,deps-jar,-verify-automatic-build,-pre-pre-compile,-pre-compile,-do-compile,-post-compile" description="Compile project." name="compile"/>
     <target name="-pre-compile-single">

@@ -73,6 +73,8 @@ public abstract class AbstractDownload implements Downloader, Runnable {
 
    /**
     * Creates an instance of game component downloading class.
+     * @param path     Game installation path.
+     * @param progress Download change listener
     */
     protected AbstractDownload(final String path, final DownloadListener progress) {
         this.path = path;

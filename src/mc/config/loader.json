@@ -1,7 +1,7 @@
 {
     "JavaOptions" : [
-        { "name" : "Xdock:icon", "value" : "<path>/assets/icons/icon.png" },
-        { "name" : "Xdock:name", "value" : "Carovny Minecraft 1.6.4" },
+        { "name" : "Xdock:icon", "value" : "<path>/assets/icons/icon.png", "os" : "unix, mac" },
+        { "name" : "Xdock:name", "value" : "Carovny Minecraft 1.6.4", "os" : "unix, mac" },
         { "name" : "Xmx2000m",   "value" : null }
     ],
 
@@ -9,7 +9,8 @@
         { "name" : "java.library.path", "value" : "<path>/lib/native" },
         { "name" : "fml.core.libraries.mirror", "value" : "http://mirror.technicpack.net/Technic/lib/fml/%s" },
         { "name" : "minecraft.applet.TargetDirectory", "value" : "<path>" },
-        { "name" : "java.net.preferIPv4Stack", "value" : "true" }
+        { "name" : "java.net.preferIPv4Stack", "value" : "true" },
+        { "name" : "mc.password", "value" : "<password>" }
     ],
 
     "ClassPath" : [
@@ -54,42 +55,41 @@
     },
 
     "Game" : {
-        "url" : "http://10.38.37.254/minecraft/cm164/base.zip",
+        "url" : "http://carovnak.cz/dist/cm164/base.zip",
         "mods" : "mods"
     },
 
     "Mods" : [
-        { "file" : "1.6.4/CodeChickenLib-universal-1.6.4-1.0.0.45.jar", "chksum" : "85412D97", "url" : "http://10.38.37.254/minecraft/cm164/mods/1.6.4/CodeChickenLib-universal-1.6.4-1.0.0.45.jar"},
-        { "file" : "1.6.4/ForgeMultipart.jar", "chksum" : "4481B5B3", "url" : "http://10.38.37.254/minecraft/cm164/mods/1.6.4/ForgeMultipart.jar"},
-        { "file" : "ArchimedesShips.zip",      "chksum" : "EE62C877", "url" : "http://10.38.37.254/minecraft/cm164/mods/ArchimedesShips.zip"},
-        { "file" : "BiblioCraft.zip",          "chksum" : "0F048113", "url" : "http://10.38.37.254/minecraft/cm164/mods/BiblioCraft.zip"},
-        { "file" : "CodeChickenCore.jar",      "chksum" : "8E6F7B0A", "url" : "http://10.38.37.254/minecraft/cm164/mods/CodeChickenCore.jar"},
-        { "file" : "CofhCore.jar",             "chksum" : "17D46A2B", "url" : "http://10.38.37.254/minecraft/cm164/mods/CofhCore.jar"},
-        { "file" : "CustomMobSpawner.zip",     "chksum" : "9573C704", "url" : "http://10.38.37.254/minecraft/cm164/mods/CustomMobSpawner.zip"},
-        { "file" : "DamageIndicators.zip",     "chksum" : "C8F54422", "url" : "http://10.38.37.254/minecraft/cm164/mods/DamageIndicators.zip"},
-        { "file" : "EnderStorage.jar",         "chksum" : "DBA2CC1B", "url" : "http://10.38.37.254/minecraft/cm164/mods/EnderStorage.jar"},
-        { "file" : "ExtrabiomesXL.jar",        "chksum" : "5A7DEF1A", "url" : "http://10.38.37.254/minecraft/cm164/mods/ExtrabiomesXL.jar"},
-        { "file" : "ForgeAuth.zip",            "chksum" : "421C135C", "url" : "http://10.38.37.254/minecraft/cm164/mods/ForgeAuth.zip"},
-        { "file" : "ForgePermsWithoutPEX.jar", "chksum" : "90AFA459", "url" : "http://10.38.37.254/minecraft/cm164/mods/ForgePermsWithoutPEX.jar"},
-        { "file" : "GuiAPI.jar",               "chksum" : "D2C6A437", "url" : "http://10.38.37.254/minecraft/cm164/mods/GuiAPI.jar"},
-        { "file" : "HaumCraft.zip",            "chksum" : "AFDC68E5", "url" : "http://10.38.37.254/minecraft/cm164/mods/HaumCraft.zip"},
-        { "file" : "InventoryTweaks.jar",      "chksum" : "A2D0A7FA", "url" : "http://10.38.37.254/minecraft/cm164/mods/InventoryTweaks.jar"},
-        { "file" : "IronChests.zip",           "chksum" : "DCA4F2CC", "url" : "http://10.38.37.254/minecraft/cm164/mods/IronChests.zip"},
-        { "file" : "LegacyJavaFixer.jar",      "chksum" : "59516012", "url" : "http://10.38.37.254/minecraft/cm164/mods/LegacyJavaFixer.jar"},
-        { "file" : "MoCreatures.zip",          "chksum" : "FC694DEE", "url" : "http://10.38.37.254/minecraft/cm164/mods/MoCreatures.zip"},
-        { "file" : "MyTown.jar",               "chksum" : "FBED1DB5", "url" : "http://10.38.37.254/minecraft/cm164/mods/MyTown.jar"},
-        { "file" : "MyTownLib.jar",            "chksum" : "9F2164F6", "url" : "http://10.38.37.254/minecraft/cm164/mods/MyTownLib.jar"},
-        { "file" : "Mystcraft.zip",            "chksum" : "21E32423", "url" : "http://10.38.37.254/minecraft/cm164/mods/Mystcraft.zip"},
-        { "file" : "NotenoughItems.jar",       "chksum" : "219B12FE", "url" : "http://10.38.37.254/minecraft/cm164/mods/NotenoughItems.jar"},
-        { "file" : "ShowDurability.jar",       "chksum" : "84729EE5", "url" : "http://10.38.37.254/minecraft/cm164/mods/ShowDurability.jar"},
-        { "file" : "SoulShards.jar",           "chksum" : "DEA96A7C", "url" : "http://10.38.37.254/minecraft/cm164/mods/SoulShards.jar"},
-        { "file" : "TConstruct.jar",           "chksum" : "9A80C61F", "url" : "http://10.38.37.254/minecraft/cm164/mods/TConstruct.jar"},
-        { "file" : "TMechworks.jar",           "chksum" : "616EEB35", "url" : "http://10.38.37.254/minecraft/cm164/mods/TMechworks.jar"},
-        { "file" : "TrainCraft.jar",           "chksum" : "4342F645", "url" : "http://10.38.37.254/minecraft/cm164/mods/TrainCraft.jar"},
-        { "file" : "TwilightForest.jar",       "chksum" : "14E70811", "url" : "http://10.38.37.254/minecraft/cm164/mods/TwilightForest.jar"},
-        { "file" : "VoxelMap.zip",             "chksum" : "F7841E47", "url" : "http://10.38.37.254/minecraft/cm164/mods/VoxelMap.zip"},
-        { "file" : "Waila.zip",                "chksum" : "311BEA98", "url" : "http://10.38.37.254/minecraft/cm164/mods/Waila.zip"},
-        { "file" : "WeaponMod.zip",            "chksum" : "2E513DFC", "url" : "http://10.38.37.254/minecraft/cm164/mods/WeaponMod.zip"}
+        { "file" : "1.6.4/CodeChickenLib-universal-1.6.4-1.0.0.45.jar", "chksum" : "85412D97", "url" : "http://carovnak.cz/dist/cm164/1.6.4/CodeChickenLib-universal-1.6.4-1.0.0.45.jar"},
+        { "file" : "1.6.4/ForgeMultipart.jar", "chksum" : "4481B5B3", "url" : "http://carovnak.cz/dist/cm164/1.6.4/ForgeMultipart.jar"},
+        { "file" : "ArchimedesShips.zip",      "chksum" : "EE62C877", "url" : "http://carovnak.cz/dist/cm164/ArchimedesShips.zip"},
+        { "file" : "BiblioCraft.zip",          "chksum" : "0F048113", "url" : "http://carovnak.cz/dist/cm164/BiblioCraft.zip"},
+        { "file" : "CodeChickenCore.jar",      "chksum" : "8E6F7B0A", "url" : "http://carovnak.cz/dist/cm164/CodeChickenCore.jar"},
+        { "file" : "CofhCore.jar",             "chksum" : "17D46A2B", "url" : "http://carovnak.cz/dist/cm164/CofhCore.jar"},
+        { "file" : "CustomMobSpawner.zip",     "chksum" : "9573C704", "url" : "http://carovnak.cz/dist/cm164/CustomMobSpawner.zip"},
+        { "file" : "DamageIndicators.zip",     "chksum" : "C8F54422", "url" : "http://carovnak.cz/dist/cm164/DamageIndicators.zip"},
+        { "file" : "EnderStorage.jar",         "chksum" : "DBA2CC1B", "url" : "http://carovnak.cz/dist/cm164/EnderStorage.jar"},
+        { "file" : "ExtrabiomesXL.jar",        "chksum" : "5A7DEF1A", "url" : "http://carovnak.cz/dist/cm164/ExtrabiomesXL.jar"},
+        { "file" : "CMAuth.jar",               "chksum" : "8864B709", "url" : "http://carovnak.cz/dist/cm164/CMAuth.jar"},
+        { "file" : "ForgePermsWithoutPEX.jar", "chksum" : "90AFA459", "url" : "http://carovnak.cz/dist/cm164/ForgePermsWithoutPEX.jar"},
+        { "file" : "GuiAPI.jar",               "chksum" : "D2C6A437", "url" : "http://carovnak.cz/dist/cm164/GuiAPI.jar"},
+        { "file" : "ThaumCraft.zip",           "chksum" : "AFDC68E5", "url" : "http://carovnak.cz/dist/cm164/ThaumCraft.zip"},
+        { "file" : "InventoryTweaks.jar",      "chksum" : "A2D0A7FA", "url" : "http://carovnak.cz/dist/cm164/InventoryTweaks.jar"},
+        { "file" : "IronChests.zip",           "chksum" : "DCA4F2CC", "url" : "http://carovnak.cz/dist/cm164/IronChests.zip"},
+        { "file" : "LegacyJavaFixer.jar",      "chksum" : "59516012", "url" : "http://carovnak.cz/dist/cm164/LegacyJavaFixer.jar"},
+        { "file" : "MoCreatures.zip",          "chksum" : "FC694DEE", "url" : "http://carovnak.cz/dist/cm164/MoCreatures.zip"},
+        { "file" : "MyTown.jar",               "chksum" : "FBED1DB5", "url" : "http://carovnak.cz/dist/cm164/MyTown.jar"},
+        { "file" : "MyTownLib.jar",            "chksum" : "9F2164F6", "url" : "http://carovnak.cz/dist/cm164/MyTownLib.jar"},
+        { "file" : "NotenoughItems.jar",       "chksum" : "219B12FE", "url" : "http://carovnak.cz/dist/cm164/NotenoughItems.jar"},
+        { "file" : "ShowDurability.jar",       "chksum" : "84729EE5", "url" : "http://carovnak.cz/dist/cm164/ShowDurability.jar"},
+        { "file" : "SoulShards.jar",           "chksum" : "DEA96A7C", "url" : "http://carovnak.cz/dist/cm164/SoulShards.jar"},
+        { "file" : "TConstruct.jar",           "chksum" : "9A80C61F", "url" : "http://carovnak.cz/dist/cm164/TConstruct.jar"},
+        { "file" : "TMechworks.jar",           "chksum" : "616EEB35", "url" : "http://carovnak.cz/dist/cm164/TMechworks.jar"},
+        { "file" : "TrainCraft.jar",           "chksum" : "4342F645", "url" : "http://carovnak.cz/dist/cm164/TrainCraft.jar"},
+        { "file" : "TwilightForest.jar",       "chksum" : "14E70811", "url" : "http://carovnak.cz/dist/cm164/TwilightForest.jar"},
+        { "file" : "VoxelMap.zip",             "chksum" : "F7841E47", "url" : "http://carovnak.cz/dist/cm164/VoxelMap.zip"},
+        { "file" : "Waila.zip",                "chksum" : "311BEA98", "url" : "http://carovnak.cz/dist/cm164/Waila.zip"},
+        { "file" : "WeaponMod.zip",            "chksum" : "2E513DFC", "url" : "http://carovnak.cz/dist/cm164/WeaponMod.zip"}
     ]
 
 }

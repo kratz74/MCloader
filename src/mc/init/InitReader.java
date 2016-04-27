@@ -16,9 +16,6 @@ import mc.log.Logger;
  */
 class InitReader extends JsonReader<LoaderInit> {
     
-    /** Logger. */
-    private static final Logger LOG = Logger.getInstance();
-
     /**
      * Reads loader initialization file.
      * @param file Loader initialization file to be read.
@@ -28,19 +25,19 @@ class InitReader extends JsonReader<LoaderInit> {
         InitReader r = null;
         File f = new File(file);
         if (f.canRead()) {
-            LOG.log(LogLevel.FINE, "Reading initialization file: %s", file);
+            Logger.log(LogLevel.FINE, "Reading initialization file: %s", file);
             try {
                 r = new InitReader(f);
                 r.parse();
             } catch (IOException ioe) {
-                LOG.log(LogLevel.WARNING, "Error reading initialization file: %s", ioe);
+                Logger.log(LogLevel.WARNING, "Error reading initialization file: %s", ioe);
             } finally {
                 if (r != null) {
                     r.close();
                 }
             }
         } else {
-            LOG.log(LogLevel.INFO, "Initialization file %s was not found", file); 
+            Logger.log(LogLevel.INFO, "Initialization file %s was not found", file); 
         }
         return r != null ? r.getData() : null;
     }
@@ -66,7 +63,7 @@ class InitReader extends JsonReader<LoaderInit> {
 	}
         String path = parser.getText();
         data.setPath(path);
-        LOG.log(LogLevel.FINEST, 1, "Path: %s", path);
+        Logger.log(LogLevel.FINEST, 1, "Path: %s", path);
     }
 
     /**
@@ -77,11 +74,26 @@ class InitReader extends JsonReader<LoaderInit> {
     private void userName() throws IOException {
 	next();
 	if (token != JsonToken.VALUE_STRING) {
-	    throw new IOException("Expected path String value");
+	    throw new IOException("Expected user name String value");
 	}
         String userName = parser.getText();
         data.setUserName(userName);
-        LOG.log(LogLevel.FINEST, 1, "User: %s", userName);
+        Logger.log(LogLevel.FINEST, 1, "User: %s", userName);
+    }
+
+    /**
+     * Process user password String.
+     * <p>
+     * {@code "userPassword": "<user_password>"
+     */
+    private void userPassword() throws IOException {
+	next();
+	if (token != JsonToken.VALUE_STRING) {
+	    throw new IOException("Expected user password String value");
+	}
+        String userPassword = parser.getText();
+        data.setUserPassword(userPassword);
+        Logger.log(LogLevel.FINEST, 1, "Password: %s", userPassword);
     }
 
     /**
@@ -106,6 +118,9 @@ class InitReader extends JsonReader<LoaderInit> {
                     }
                     if ("username".equals(name.toLowerCase())) {
                         userName();
+                    }
+                    if ("userpassword".equals(name.toLowerCase())) {
+                        userPassword();
                     }
                     break;
                 case END_OBJECT:
