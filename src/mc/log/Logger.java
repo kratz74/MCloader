@@ -25,7 +25,7 @@ public class Logger {
      * @param level Level to check.
      * @return Value of {@code true} if the given level will be logged or {@code false} otherwise.
      */
-    public boolean shouldLog(final LogLevel level) {
+    public static boolean shouldLog(final LogLevel level) {
         return INSTANCE.level.shouldLog(level);
     }
    
@@ -112,7 +112,7 @@ public class Logger {
      * Creates an instance of logger.
      */
     private Logger() {
-        level = LogLevel.FINEST;
+        level = LogLevel.FINE;
         indentSize = 2;
     }
 

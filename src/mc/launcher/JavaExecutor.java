@@ -231,11 +231,32 @@ public class JavaExecutor {
 
     public Process exec() {
         try {
-            Logger.log(LogLevel.FINE, "Running game in %s", path.getAbsoluteFile());
+            if (Logger.shouldLog(LogLevel.FINE)) {
+                Logger.log(LogLevel.FINE, "Running game in %s", path.getAbsoluteFile());
+                Logger.log(LogLevel.FINE, "Executing %s", execArgsToString());
+            }
             return Runtime.getRuntime().exec(execArgs, (String[])null, path);
         } catch (IOException ex) {
-            Logger.log(LogLevel.FATAL, "Could not execute process: %s", ex);
+            Logger.log(LogLevel.FATAL, "Could not execute process: ", ex);
             return null;
+        }
+    }
+
+    private String execArgsToString() {
+        if (execArgs == null) {
+            return "<null>";
+        } else {
+            final StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (String arg : execArgs) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(' ');
+                }
+                sb.append(arg);
+            }
+            return sb.toString();
         }
     }
 

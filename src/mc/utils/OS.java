@@ -6,6 +6,8 @@ package mc.utils;
 import java.io.File;
 import java.util.HashMap;
 import mc.log.LogLevel;
+import mc.log.Logger;
+import mc.ui.loader.LoaderFrame;
 
 /**
  * Operating system type.
@@ -69,10 +71,13 @@ public enum OS {
         final String osLc = osName.toLowerCase();
         // TODO: Find more effective way.
         if (osLc.contains("windows")) {
+            Logger.log(LogLevel.FINE, "OS: %s for OS name: %s", WIN, osLc);
             return WIN;
         } else if (osLc.startsWith("mac")) {
+            Logger.log(LogLevel.FINE, "OS: %s for OS name: %s", MAC, osLc);
             return MAC;
         } else {
+            Logger.log(LogLevel.FINE, "OS: %s for OS name: %s", UNIX, osLc);
             return UNIX;
         }
     }

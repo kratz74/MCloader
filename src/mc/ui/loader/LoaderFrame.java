@@ -20,6 +20,7 @@ import mc.installer.DownloadBase;
 import mc.installer.DownloadModules;
 import mc.installer.Downloader;
 import mc.utils.PasswordUtils;
+import mc.utils.Version;
 
 /**
  *
@@ -187,6 +188,14 @@ public class LoaderFrame extends javax.swing.JFrame {
 //        downloadListener = new ModuleDownloadListener(this);
         installer = null;
         initDownloadComponents();
+    }
+
+    /**
+     * Build version label value.
+     * @return Version label value.
+     */
+    private String versionLabel() {
+        return "Minecraft Launcher " + Version.MAJOR + "." + Version.MINOR + ", \u00A9 2016 Tomáš Kraus";
     }
 
     /**
@@ -388,6 +397,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         tabs = new javax.swing.JTabbedPane();
         game = new javax.swing.JPanel();
         picture = new javax.swing.JLabel(new ImageIcon(logoPicure));
+        versionLabel = new javax.swing.JLabel();
         install = new javax.swing.JPanel();
         downloadLabel = new javax.swing.JLabel();
         downloadProgress = new javax.swing.JProgressBar();
@@ -435,16 +445,26 @@ public class LoaderFrame extends javax.swing.JFrame {
             }
         });
 
+        versionLabel.setFont(new java.awt.Font("Lucida Grande", 0, 10)); // NOI18N
+        versionLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        versionLabel.setText(versionLabel());
+
         javax.swing.GroupLayout gameLayout = new javax.swing.GroupLayout(game);
         game.setLayout(gameLayout);
         gameLayout.setHorizontalGroup(
             gameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(picture, javax.swing.GroupLayout.DEFAULT_SIZE, 613, Short.MAX_VALUE)
+            .addGroup(gameLayout.createSequentialGroup()
+                .addGroup(gameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(versionLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 608, Short.MAX_VALUE)
+                    .addComponent(picture, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 6, Short.MAX_VALUE))
         );
         gameLayout.setVerticalGroup(
             gameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(gameLayout.createSequentialGroup()
-                .addComponent(picture, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, gameLayout.createSequentialGroup()
+                .addComponent(picture, javax.swing.GroupLayout.DEFAULT_SIZE, 330, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(versionLabel)
                 .addContainerGap())
         );
 
@@ -505,7 +525,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                     .addGroup(installLayout.createSequentialGroup()
                         .addGroup(installLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(downloadLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(downloadProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
+                            .addComponent(downloadProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, installLayout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
                                 .addComponent(buttonInstall, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -690,5 +710,6 @@ public class LoaderFrame extends javax.swing.JFrame {
     private javax.swing.JTabbedPane tabs;
     private javax.swing.JTextField userName;
     private javax.swing.JLabel userNameLabel;
+    private javax.swing.JLabel versionLabel;
     // End of variables declaration//GEN-END:variables
 }
