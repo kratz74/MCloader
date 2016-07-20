@@ -13,6 +13,9 @@ import mc.utils.FileUtils;
  */
 public class LoaderConfig {
 
+    /** Path elements separator used in JSON configuration files. */
+    public static final char SEPARATOR = '/';
+
     /**
      * Mod configuration element.
      */

@@ -4,6 +4,7 @@
 package mc.config;
 
 import com.fasterxml.jackson.core.JsonToken;
+import java.io.File;
 import java.io.IOException;
 import mc.json.JsonReader;
 import mc.log.LogLevel;
@@ -79,7 +80,11 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
                 case "value":
                     switch (token) {
                         case VALUE_STRING:
-                            optionValue = parser.getText();
+                            String value = parser.getText();
+                            if (value != null && !value.toLowerCase().startsWith("http:")) {
+                                value = value.replace(LoaderConfig.SEPARATOR, File.separatorChar);
+                            }
+                            optionValue = value;
                             break;
                         case VALUE_NULL:
                             optionValue = null;
@@ -183,7 +188,7 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
 	next();
 	while (token == JsonToken.VALUE_STRING) {
 	    String value = parser.getText();
-	    data.addClassPath(value);
+	    data.addClassPath(value != null ? value.replace(LoaderConfig.SEPARATOR, File.separatorChar) : null);
             Logger.log(LogLevel.FINEST, 2, "ClassPath: %s", value);
 	    next();
 	}
@@ -234,7 +239,8 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
                     throw new IOException("Expected 'value' field String or null value");
             }
             next();
-            data.addArgument(new Argument(name, value));
+            data.addArgument(new Argument(
+                    name, value != null ? value.replace(LoaderConfig.SEPARATOR, File.separatorChar) : null));
             Logger.log(LogLevel.FINEST, 2, "Argumant: %s = %s", name, value != null ? value : "null");
         }
 	// Verify that last symbol is object end.
