@@ -10,6 +10,15 @@
 <project name="CMloader" default="default" basedir=".">
     <description>Builds, tests, and runs the project CMloader.</description>
     <import file="nbproject/build-impl.xml"/>
+
+    <target name="-pre-jar">
+        <unjar src="${file.reference.jackson-core-2.7.0.jar}"
+               dest="${build.classes.dir}">
+            <patternset>
+                <include name="com/**"/>
+            </patternset>
+        </unjar>
+    </target>
     <!--
 
     There exist several targets which are by default empty and which can be 

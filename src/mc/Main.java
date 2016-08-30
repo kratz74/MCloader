@@ -20,6 +20,19 @@ public class Main {
     /** Thread name. */
     private static final String THREAD_NAME = "CM164.Main";
 
+    /**
+     * Check whether the subprocess represented by provided {@code Process} instance is alive.
+     * @param p Subprocess {@code Process} instance to be checked.
+     * @return {@code true} if the subprocess represented by this {@code Process} object has not yet terminated.
+     */
+    public static boolean isAlive(Process p) {
+        try {
+            p.exitValue();
+            return false;
+        } catch(IllegalThreadStateException e) {
+            return true;
+        }
+    }
     /** 
      * @param args the command line arguments
      */
@@ -71,7 +84,7 @@ public class Main {
                 if (wait) {
                     Thread.sleep(200);
                 }
-                waitForThread = p.isAlive();
+                waitForThread = isAlive(p);
             }
             System.out.println("Exit code: " + p.exitValue());
         } catch (IOException | InterruptedException ex) {

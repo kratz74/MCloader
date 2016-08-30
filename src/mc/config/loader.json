@@ -49,8 +49,8 @@
         "assetsDir" : "<path>/assets",
         "tweakClass" : "cpw.mods.fml.common.launcher.FMLTweaker",
         "title" : "Carovny Minecraft 1.6.4",
-        "width" : "1440",
-        "height" : "900",
+        "width" : "1024",
+        "height" : "768",
         "icon" : "<path>/assets/icons/icon.png"
     },
 
