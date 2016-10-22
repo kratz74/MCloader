@@ -88,11 +88,11 @@ public class LoaderFrame extends javax.swing.JFrame {
     /**
      * Load image bitmap.
      */
-    private static BufferedImage readImage(final String file) {
+    private static BufferedImage readImage() {
         try {
             return ImageIO.read(LoaderFrame.class.getResourceAsStream(LOGO_FILE));
         } catch (IOException ex) {
-            Logger.log(LogLevel.WARNING, "Could not read image %s", file);
+            Logger.log(LogLevel.WARNING, "Could not read image %s", LOGO_FILE);
             return null;        
         }
     }
@@ -178,7 +178,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         userCheckCache = checkUserName(LoaderInit.getUserName());
         passCheckCache = checkUserPassword(LoaderInit.getUserPassword());
         installationState = GameState.gameState(pathExists, gameCheckCache, ctx.modsToFix.isEmpty());
-        logoPicure = readImage("/data/CMloader/src/mc/launcher/thaumcraft.png");
+        logoPicure = readImage();
         directoryChooser = createDirectoryChooser();
         Logger.log(LogLevel.FINE, "Game start is %senabled", startEnabled() ? "" : "not ");
         Logger.log(LogLevel.FINEST, "  Game path: %s", gameCheckCache ? "OK" : "Not OK ");
@@ -413,6 +413,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(800, 600));
         setMinimumSize(new java.awt.Dimension(640, 480));
+        setPreferredSize(new java.awt.Dimension(600, 480));
 
         userName.setText(LoaderInit.getUserName());
         userName.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -445,6 +446,10 @@ public class LoaderFrame extends javax.swing.JFrame {
             }
         });
 
+        tabs.setPreferredSize(new java.awt.Dimension(600, 600));
+
+        picture.setBackground(new java.awt.Color(0, 0, 0));
+
         versionLabel.setFont(new java.awt.Font("Lucida Grande", 0, 10)); // NOI18N
         versionLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         versionLabel.setText(versionLabel());
@@ -462,7 +467,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         gameLayout.setVerticalGroup(
             gameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, gameLayout.createSequentialGroup()
-                .addComponent(picture, javax.swing.GroupLayout.DEFAULT_SIZE, 330, Short.MAX_VALUE)
+                .addComponent(picture, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(versionLabel)
                 .addContainerGap())
@@ -554,7 +559,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                         .addComponent(downloadProgress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(buttonInstall)
-                        .addGap(0, 227, Short.MAX_VALUE))
+                        .addGap(0, 247, Short.MAX_VALUE))
                     .addComponent(modulesList, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -590,14 +595,14 @@ public class LoaderFrame extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(buttonStart))
                             .addComponent(gameState, javax.swing.GroupLayout.PREFERRED_SIZE, 334, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(tabs))
+                    .addComponent(tabs, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(tabs)
+                .addComponent(tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 421, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(userNameLabel)

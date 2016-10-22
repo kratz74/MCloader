@@ -20,7 +20,7 @@ import mc.utils.FileUtils;
 public class DownloadModules extends AbstractDownload {
 
     /** Thread name. */
-    private static final String THREAD_NAME = "CM164.Update";
+    private static final String THREAD_NAME = "CM.Update";
 
     /** Modules path under game installation root. */
     private final String modsPath;

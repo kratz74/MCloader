@@ -18,7 +18,7 @@ import mc.ui.loader.UiContext;
 public class Main {
 
     /** Thread name. */
-    private static final String THREAD_NAME = "CM164.Main";
+    private static final String THREAD_NAME = "CM.Main";
 
     /**
      * Check whether the subprocess represented by provided {@code Process} instance is alive.

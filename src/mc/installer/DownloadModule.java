@@ -9,7 +9,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 import static mc.installer.AbstractDownload.TMP_EXT;
 import mc.log.LogLevel;
@@ -20,6 +22,37 @@ import mc.ui.loader.DownloadListener;
  * Downloads game module.
  */
 public class DownloadModule {
+
+    /** HTTP PROXY configuration. */
+    private static final Proxy PROXY = initProxy();
+
+    /**
+     * Initialize HTTP PROXY to be used for modules download.
+     * @return New {@link Proxy} instance or {@code null} if no PROXY is set.
+     */
+    private static Proxy initProxy() {
+        String proxyStr = System.getenv("http_proxy");
+        //String proxyStr = "www-proxy-ukc1.uk.oracle.com:80";
+        if (proxyStr == null) {
+            proxyStr = System.getenv("HTTP_PROXY");
+            
+        }
+        if (proxyStr != null) {
+            try {
+                if (!proxyStr.startsWith("http://")) {
+                    proxyStr = "http://" + proxyStr;
+                }
+                final URL url = new URL(proxyStr);
+                Logger.log(LogLevel.FINE, "HTTP proxy: %s:%d", url.getHost(), url.getPort());
+                return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(url.getHost(), url.getPort()));
+            } catch (MalformedURLException ex) {
+                Logger.log(LogLevel.WARNING, "Invalid URL: %s", proxyStr);
+                return Proxy.NO_PROXY;
+            }
+        }
+        Logger.log(LogLevel.FINE, "No HTTP proxy is set");
+        return Proxy.NO_PROXY;
+    }
 
     /** Internal buffer size. */
     private static final int BUFFER_SIZE = 0x7FFF;    
@@ -77,7 +110,8 @@ public class DownloadModule {
         OutputStream out = null;
         boolean transferOk = true;
         try {
-            in = source.openStream();
+            in = source.openConnection(PROXY).getInputStream();
+            //in = source.openStream();
             out = new FileOutputStream(tmpPath);
             int transfered = 0;
             int len;

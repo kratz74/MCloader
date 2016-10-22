@@ -7,7 +7,6 @@ import java.io.File;
 import java.util.HashMap;
 import mc.log.LogLevel;
 import mc.log.Logger;
-import mc.ui.loader.LoaderFrame;
 
 /**
  * Operating system type.
@@ -28,7 +27,7 @@ public enum OS {
     public static final String home = getUserHome();
 
     /** Game directory name. */
-    public static final String gameDirName = "cm164";
+    public static final String gameDirName = "lotr1710";
 
     /** Initialization folder storage path. */
     public static final String initPath = getAppData();

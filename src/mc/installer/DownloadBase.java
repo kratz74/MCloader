@@ -101,7 +101,7 @@ public class DownloadBase extends AbstractDownload {
     private static final int BUFFER_SIZE = 0x7FFF;    
 
     /** Thread name. */
-    private static final String THREAD_NAME = "CM164.Install";
+    private static final String THREAD_NAME = "CM.Install";
     
     /** Game base package URL {@link String}. */
     private final String gameUrlStr;
