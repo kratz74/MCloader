@@ -17,9 +17,6 @@ import mc.log.Logger;
  */
 public class InitWriter implements Closeable {
     
-    /** Logger. */
-    private static final Logger LOG = Logger.getInstance();
-
     /** JSON parser factory. */
     private static final JsonFactory FACTORY = new JsonFactory();
 
@@ -29,11 +26,11 @@ public class InitWriter implements Closeable {
      * @param data Initialization file content.
      */
     public static void write(final String file, final LoaderInit data) {
-        LOG.log(LogLevel.FINE, "Writing initialization file: %s", file);
+        Logger.log(LogLevel.FINE, "Writing initialization file: %s", file);
 	try (InitWriter w = new InitWriter(new File(file), data)) {
 	    w.write();
 	} catch (IOException ioe) {
-	    LOG.log(LogLevel.WARNING, "Error writing initialization file: %s", ioe);
+	    Logger.log(LogLevel.WARNING, "Error writing initialization file: %s", ioe);
 	}        
     }
 
@@ -64,6 +61,7 @@ public class InitWriter implements Closeable {
         final String path = LoaderInit.getPath();
         final String userName = LoaderInit.getUserName();
         final String userPassword = LoaderInit.getUserPassword();
+        final String profile = LoaderInit.getProfile();
         if (path != null) {
             generator.writeFieldName("path");
             generator.writeString(path);
@@ -75,7 +73,11 @@ public class InitWriter implements Closeable {
         if (userPassword != null) {
             generator.writeFieldName("userPassword");
             generator.writeString(userPassword);
-        } 
+        }
+        if (profile != null) {
+            generator.writeFieldName("profile");
+            generator.writeString(profile);
+        }
         generator.writeEndObject();
     }
 
@@ -87,7 +89,7 @@ public class InitWriter implements Closeable {
 	try {
             generator.close();
 	} catch (IOException ioe) {
-	    LOG.log(LogLevel.WARNING, "Error closing initialization file: %s", ioe);
+	    Logger.log(LogLevel.WARNING, "Error closing initialization file: %s", ioe);
 	}
     }
 }

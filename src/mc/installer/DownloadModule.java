@@ -4,58 +4,15 @@
 package mc.installer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Proxy;
 import java.net.URL;
-import static mc.installer.AbstractDownload.TMP_EXT;
-import mc.log.LogLevel;
-import mc.log.Logger;
 import mc.ui.loader.DownloadListener;
 
 /**
  * Downloads game module.
  */
 public class DownloadModule {
-
-    /** HTTP PROXY configuration. */
-    private static final Proxy PROXY = initProxy();
-
-    /**
-     * Initialize HTTP PROXY to be used for modules download.
-     * @return New {@link Proxy} instance or {@code null} if no PROXY is set.
-     */
-    private static Proxy initProxy() {
-        String proxyStr = System.getenv("http_proxy");
-        //String proxyStr = "www-proxy-ukc1.uk.oracle.com:80";
-        if (proxyStr == null) {
-            proxyStr = System.getenv("HTTP_PROXY");
-            
-        }
-        if (proxyStr != null) {
-            try {
-                if (!proxyStr.startsWith("http://")) {
-                    proxyStr = "http://" + proxyStr;
-                }
-                final URL url = new URL(proxyStr);
-                Logger.log(LogLevel.FINE, "HTTP proxy: %s:%d", url.getHost(), url.getPort());
-                return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(url.getHost(), url.getPort()));
-            } catch (MalformedURLException ex) {
-                Logger.log(LogLevel.WARNING, "Invalid URL: %s", proxyStr);
-                return Proxy.NO_PROXY;
-            }
-        }
-        Logger.log(LogLevel.FINE, "No HTTP proxy is set");
-        return Proxy.NO_PROXY;
-    }
-
-    /** Internal buffer size. */
-    private static final int BUFFER_SIZE = 0x7FFF;    
 
     /** Source URL. */
     private final URL source;
@@ -85,61 +42,10 @@ public class DownloadModule {
      * @throws java.io.IOException when problem with transfer occurs.
      */
     public void download() throws IOException {
-        File parentDir = target.getParentFile();
-        if (parentDir != null && !parentDir.exists()) {
-           boolean dirCreated = parentDir.mkdirs();
-            if (dirCreated) {
-                Logger.log(LogLevel.FINE, 1, "Created %s", parentDir.getAbsolutePath());
-            } else {
-                Logger.log(LogLevel.WARNING, 0, "Could not create %s", parentDir.getAbsolutePath());
-            }
-            
+        if (!AbstractDownload.mkParentDir(target)) {
+            return;
         }
-        progress.name(target.getName());
-        long size = AbstractDownload.getContentLength(source);
-        if (size < 0) {
-            if (target.exists()) {
-                size = target.length();
-            } else {
-                size = 1;
-            }
-        }
-        Logger.log(LogLevel.FINE, 1, "Opening %s: ", source.toString());
-        final File tmpPath = new File(target.getAbsolutePath() + TMP_EXT);
-        InputStream in = null;
-        OutputStream out = null;
-        boolean transferOk = true;
-        try {
-            in = source.openConnection(PROXY).getInputStream();
-            //in = source.openStream();
-            out = new FileOutputStream(tmpPath);
-            int transfered = 0;
-            int len;
-            final byte[] buff = new byte[BUFFER_SIZE];
-            while((len = in.read(buff)) >= 0) {
-                out.write(buff, 0, len);
-                transfered += len;
-                long percent = transfered * 100 / size;
-                progress.progress(percent <= 100 ? (int)percent : 100);
-                Logger.log(LogLevel.FINEST, 2, "Progress: %d ", percent <= 100 ? (int)percent : 100);
-            }
-        } catch (FileNotFoundException fne) {
-            transferOk = false;
-            Logger.log(LogLevel.WARNING, 0, "Could not create %s: %s", tmpPath, fne.getLocalizedMessage());
-        } catch (IOException ioe) {
-            transferOk = false;
-            Logger.log(LogLevel.WARNING, 0, "Could not write %s: %s", tmpPath, ioe.getLocalizedMessage());                        
-        } finally {
-            AbstractDownload.close(in);
-            AbstractDownload.close(out);
-        }
-        if (transferOk) {
-            tmpPath.renameTo(target);
-            Logger.log(LogLevel.FINE, 1, "Downloaded: %s -> %s", tmpPath.getAbsolutePath(), target.getName());
-        } else {
-            tmpPath.delete();
-            Logger.log(LogLevel.WARNING, 0, "Failed: %s", tmpPath.getAbsolutePath());
-        }
+        AbstractDownload.transfer(source, target, progress);
     }
 
 }

@@ -26,11 +26,20 @@ public enum OS {
     /** Current user home directory. */
     public static final String home = getUserHome();
 
+    /** Loader directory name. */
+    public static final String loaderDirName = "mcloader";
+
+    /** Loader directory name. */
+    public static final String loaderDirNameUnix = '.' + loaderDirName;
+
     /** Game directory name. */
     public static final String gameDirName = "lotr1710";
 
     /** Initialization folder storage path. */
     public static final String initPath = getAppData();
+
+    /** File separator length. */
+    public static final int FSEP_LEN = File.separator.length();
 
     /** Application data subdirectory on modern Windows (7, 8, 10). */
     private static final String WIN_APPDATA_LOCAL = "AppData\\Local";
@@ -96,15 +105,7 @@ public enum OS {
      * @return Application data directory for launcher on UNIX systems.
      */
     private static String getAppDataUnix() {
-        final boolean addSep = !home.endsWith(File.separator);
-        final StringBuilder sb = new StringBuilder(home.length() + gameDirName.length() + (addSep ? 2 : 1));
-        sb.append(home);
-        if (addSep) {
-            sb.append(File.separator);
-        }
-        sb.append('.');
-        sb.append(gameDirName);
-        return sb.toString();
+        return FileUtils.fullPath(home, loaderDirNameUnix);
     }
 
     /**
@@ -113,7 +114,7 @@ public enum OS {
      */
     private static String getAppDataLocalPath() {
         final boolean addSep = !home.endsWith(File.separator);
-        final StringBuilder sb = new StringBuilder(home.length() + WIN_APPDATA_LOCAL.length() + (addSep ? 1 : 0));
+        final StringBuilder sb = new StringBuilder(home.length() + WIN_APPDATA_LOCAL.length() + (addSep ? 1 * FSEP_LEN : 0));
         sb.append(home);
         if (addSep) {
             sb.append(File.separator);
@@ -128,7 +129,7 @@ public enum OS {
      */
     private static String getLocSetAppDataPath() {
         final boolean addSep = !home.endsWith(File.separator);
-        final StringBuilder sb = new StringBuilder(home.length() + WIN_LOCSET_APPDATA.length() + (addSep ? 1 : 0));
+        final StringBuilder sb = new StringBuilder(home.length() + WIN_LOCSET_APPDATA.length() + (addSep ? 1 * FSEP_LEN : 0));
         sb.append(home);
         if (addSep) {
             sb.append(File.separator);
@@ -146,13 +147,13 @@ public enum OS {
         String appDataName = getAppDataLocalPath();
         File appDataPath = new File(appDataName);
         if (appDataPath.isDirectory()) {
-            return FileUtils.fullPath(appDataName, gameDirName);
+            return FileUtils.fullPath(appDataName, loaderDirName);
         }
         // Try old Windows path as a second option.
         appDataName = getLocSetAppDataPath();
         appDataPath = new File(appDataName);
         if (appDataPath.isDirectory()) {
-            return FileUtils.fullPath(appDataName, gameDirName);
+            return FileUtils.fullPath(appDataName, loaderDirName);
         }
         // Use UNIX style path as a fallback.
         return getAppDataUnix();
@@ -174,17 +175,11 @@ public enum OS {
     /**
      * Get application installation directory for game on UNIX systems.
      * This is just normal visible directory in user home directory.
+     * @param gameDirName Name of game subdirectory.
      * @return Application installation directory for game on UNIX systems.
      */
-    private static String getGameDataUnix() {
-        final boolean addSep = !home.endsWith(File.separator);
-        final StringBuilder sb = new StringBuilder(home.length() + gameDirName.length() + (addSep ? 1 : 0));
-        sb.append(home);
-        if (addSep) {
-            sb.append(File.separator);
-        }
-        sb.append(gameDirName);
-        return sb.toString();
+    private static String getGameDataUnix(final String gameDirName) {
+        return FileUtils.fullPath(home, loaderDirNameUnix, gameDirName);
     }
 
     /**
@@ -204,14 +199,15 @@ public enum OS {
 
     /**
      * Get application installation directory for game on Windows systems.
+     * @param gameDirName Name of game subdirectory.
      * @return Application installation directory for game on Windows systems.
      */
-    private static String getGameDataWin() {
+    private static String getGameDataWin(final String gameDirName) {
         // Try modern Windows path first.
         String appDataName = getAppDataRoamingPath();
         File appDataPath = new File(appDataName);
         if (appDataPath.isDirectory()) {
-            return FileUtils.fullPath(appDataName, gameDirName);
+            return FileUtils.fullPath(appDataName, loaderDirName, gameDirName);
         }
         // Use UNIX style path as a fallback.
         return getAppDataUnix();
@@ -219,13 +215,14 @@ public enum OS {
 
     /**
      * Get default application application installation directory for game.
+     * @param gameDirName Name of game subdirectory.
      * @return Default application application installation directory for game.
      */
-    public static String getDefaultGameDir() {
+    public static String getGameDir(final String gameDirName) {
         switch(OS.os) {
             case UNIX:
-            case MAC: return getGameDataUnix();
-            case WIN: return getGameDataWin();
+            case MAC: return getGameDataUnix(gameDirName);
+            case WIN: return getGameDataWin(gameDirName);
             default:
                     throw new IllegalStateException("Unknown OS identifier");
        }

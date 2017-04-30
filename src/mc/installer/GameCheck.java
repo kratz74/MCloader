@@ -85,6 +85,9 @@ public class GameCheck {
      * @return Value of {@code true} when game installation root directory exists or {@code false} otherwise.
      */
     public boolean checkInstallDir(final String path) {
+        if (path == null) {
+            return false;
+        }
         final File fPath = new File(path);
         return fPath.isDirectory();
     }
@@ -95,8 +98,11 @@ public class GameCheck {
      * @return Value of {@code true} when all class path files exist or {@code false} otherwise.
      */
     private boolean checkClassPath(final String path) {
-        boolean cpOk = true;
+        if (!LoaderConfig.isConfig()) {
+            return false;
+        }
         final LinkedList<String> cp = LoaderConfig.getClassPath();
+        boolean cpOk = true;
         for (final String item : cp) {
             final File cpFile = new File(FileUtils.fullPath(path, item));
             if (!cpFile.isFile() || !cpFile.canRead()) {

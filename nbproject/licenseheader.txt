@@ -1,7 +1,7 @@
 <#if licenseFirst??>
 ${licenseFirst}
 </#if>
-${licensePrefix}(C) 2016 Tomas Kraus
+${licensePrefix}(C) 2017 Tomas Kraus
 <#if licenseLast??>
 ${licenseLast}
 </#if>

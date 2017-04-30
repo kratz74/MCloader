@@ -10,5 +10,5 @@ public class Version {
     /** Launcher major version number. */
     public static final byte MAJOR = 1;
     /** Launcher minor version number. */
-    public static final byte MINOR = 0;
+    public static final byte MINOR = 2;
 }

@@ -19,8 +19,10 @@ public interface DownloadListener {
     /**
      * Mark downloading as ended.
      * This will deactivate related UI elements.
+     * @param result Thread execution result: Value of {@code true} if thread execution was finished successfully
+     *               or {@code false} otherwise.
      */
-    public void end();
+    public void end(final boolean result);
 
     /**
      * Set current download target name.

@@ -8,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -22,18 +21,39 @@ import mc.utils.FileUtils;
  */
 public class DownloadBase extends AbstractDownload {
 
+    /** Thread name. */
+    private static final String THREAD_NAME = "CM.Install";
+    
+    /** Game base package URL {@link String}. */
+    private final String gameUrlStr;
+
+    /**
+     * Creates an instance of base installation download.
+     * @param path    Game installation path.
+     * @param gameUrl Game base package URL.
+     * @param progress  Download change listener.
+    */
+    public DownloadBase(final String path, final String gameUrl, final DownloadListener progress) {
+        super(path, progress);
+        this.gameUrlStr = gameUrl;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected String threadName() {
+        return THREAD_NAME;
+    }
+
     /**
      * Downloading thread main method.
+     * @return Value of {@code true} if thread execution was finished successfully or {@code false} otherwise.
      */
     @Override
-    public void thread() {
+    public boolean thread() {
         Logger.log(LogLevel.FINE, "Downloading %s: ", gameUrlStr);
-        final URL gameUrl;
-        try {
-            gameUrl = new URL(gameUrlStr);
-        } catch (MalformedURLException ex) {
-            Logger.log(LogLevel.WARNING, "Invalid URL: %s", gameUrlStr);
-            return;
+        final URL gameUrl = toURL(gameUrlStr);
+        if (gameUrl == null) {
+            return false;
         }
         progress.name("Game basic files");
         long size = AbstractDownload.getContentLength(gameUrl);
@@ -44,7 +64,7 @@ public class DownloadBase extends AbstractDownload {
         ZipInputStream in = null;
         try {
             final byte[] buff = new byte[BUFFER_SIZE];
-            in = new ZipInputStream(gameUrl.openStream());
+            in = new ZipInputStream(gameUrl.openConnection(AbstractDownload.PROXY).getInputStream());
             long transfered = 0;
             ZipEntry entry;
             while((entry = in.getNextEntry()) != null) {
@@ -96,32 +116,7 @@ public class DownloadBase extends AbstractDownload {
         } finally {
             AbstractDownload.close(in);
         }
+        return true;
     }
-    /** Internal buffer size. */
-    private static final int BUFFER_SIZE = 0x7FFF;    
-
-    /** Thread name. */
-    private static final String THREAD_NAME = "CM.Install";
-    
-    /** Game base package URL {@link String}. */
-    private final String gameUrlStr;
-
-    /**
-     * Creates an instance of base installation download.
-     * @param path    Game installation path.
-     * @param gameUrl Game base package URL.
-     * @param progress  Download change listener.
-    */
-    public DownloadBase(final String path, final String gameUrl, final DownloadListener progress) {
-        super(path, progress);
-        this.gameUrlStr = gameUrl;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected String threadName() {
-        return THREAD_NAME;
-    }
-
 
 }

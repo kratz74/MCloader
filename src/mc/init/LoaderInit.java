@@ -3,17 +3,30 @@
  */
 package mc.init;
 
+import java.io.File;
+import java.util.LinkedList;
 import mc.utils.FileUtils;
 import mc.utils.OS;
-import java.io.File;
 
 /**
  * Loader initialization.
  */
 public class LoaderInit {
 
+    /** Games base download URL. */
+    private static final String BASE_URL = "http://www.carovnak.cz/dist";
+    
     /** File name used to store content of this object. */
-    private static final String FILE_NAME = "init";    
+    private static final String INIT_NAME = "init";    
+
+    /** File name used to store profiles list. */
+    private static final String PROFILES_NAME = "profiles.json";    
+
+    /** Full path of file name used to store profiles list. */
+    public static final String PROFILES_PATH = FileUtils.fullPath(OS.initPath, PROFILES_NAME);    
+
+    /** Profiles file URL. */
+    public static final String PROFILES_URL = BASE_URL + '/' + PROFILES_NAME; 
 
     /** Loader initialization instance. initialization data are stored in static context for whole application. */
     private static final LoaderInit INIT = create();
@@ -24,11 +37,13 @@ public class LoaderInit {
      * @return Loader initialization object.
      */
     public static LoaderInit create() {
-        final String filePath = FileUtils.fullPath(OS.initPath, FILE_NAME);
-        LoaderInit init = InitReader.read(filePath);
+        final String initPath = FileUtils.fullPath(OS.initPath, INIT_NAME);
+        LoaderInit init = InitReader.read(initPath);
         if (init == null) {
-            init = new LoaderInit(OS.getDefaultGameDir());
+            init = new LoaderInit();
         }
+        final File profilesFile = new File(PROFILES_PATH);
+        init.setProfiles(ProfileReader.read(profilesFile));
         return init;
     }
 
@@ -37,7 +52,7 @@ public class LoaderInit {
      */
     public static void persist() {
         if (INIT.modified) {
-            final String filePath = FileUtils.fullPath(OS.initPath, FILE_NAME);
+            final String filePath = FileUtils.fullPath(OS.initPath, INIT_NAME);
             final File fileDir = new File(OS.initPath);
             if (!fileDir.exists()) {
                 fileDir.mkdirs();
@@ -97,6 +112,89 @@ public class LoaderInit {
         INIT.modified = true;
     }
 
+   /**
+     * Get stored profile name.
+     * @return Stored profile name.
+     */
+    public static String getProfile() {
+        return INIT.profile;
+    }
+    
+   /**
+     * Update stored profile name.
+     * @param profile Profile name to be stored.
+     */
+    public static void updateProfile(String profile) {
+        INIT.profile = profile;
+        INIT.modified = true;
+    }
+
+    /**
+     * Get stored profiles list.
+     * @return Stored profiles list.
+     */
+    public static LinkedList<Profile> getProfiles() {
+        return INIT.profiles;
+    }
+
+    /**
+     * Update stored profiles list.
+     */
+    public static void updateProfiles() {
+        final File profilesFile = new File(PROFILES_PATH);
+        INIT.setProfiles(ProfileReader.read(profilesFile));
+    }
+
+    /**
+     * Get currently selected profile.
+     * @return Currently selected profile.
+     */
+    public static Profile getCurrentProfile() {
+        if (INIT.profiles == null || INIT.profile == null || INIT.profile.length() == 0) {
+            return null;
+        }
+        Profile current = null;
+        for (Profile profile : INIT.profiles) {
+            if (INIT.profile.equalsIgnoreCase(profile.getDirectory())) {
+                return profile;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get game directory related to currently selected profile.
+     * @return Game directory related to currently selected profile.
+     */
+    public static String getCurrentGameDir() {
+        final Profile profile = getCurrentProfile();
+        return profile != null ? OS.getGameDir(profile.getDirectory()) : null;
+    }
+
+    /**
+     * Get game directory related to currently selected profile.
+     * @param profileIn Current profile if available. Search for default profile will be done when {@code null}.
+     * @return Game directory related to currently selected profile.
+     */
+    public static String getCurrentConfigFile(final Profile profileIn) {
+        final Profile profile = profileIn != null ? profileIn : getCurrentProfile();
+        return profile != null ? FileUtils.fullPathwithsuffix(OS.initPath, ".json", profile.getDirectory()) : null;
+    }
+
+    /**
+     * Get game directory related to currently selected profile.
+     * @param profileIn Current profile if available. Search for default profile will be done when {@code null}.
+     * @return Game directory related to currently selected profile.
+     */
+    public static String getCurrentConfigURL(final Profile profileIn) {
+        final Profile profile = profileIn != null ? profileIn : getCurrentProfile();
+        if (profile != null) {
+            return BASE_URL + '/' + profile.getDirectory() + ".json";
+        } else {
+            return null;
+        }
+    }
+
     /** Installation path. */
     private String path;
 
@@ -106,6 +204,12 @@ public class LoaderInit {
     /** Stored user password (encrypted). */
     private String userPassword;
 
+    /** Selected game profile. */
+    private String profile;
+
+    /** List of existing game profiles. */
+    private LinkedList<Profile> profiles;
+
     /** Content modification indicator. */
     private boolean modified;
 
@@ -113,10 +217,7 @@ public class LoaderInit {
      * Creates an empty instance of loader initialization.
      */
     LoaderInit() {
-	this.path = null;
-        this.userName = null;
-        this.userPassword = null;
-        this.modified = false;
+        this(null);
     }
 
     /**
@@ -124,9 +225,11 @@ public class LoaderInit {
      * @param path Installation path.
      */
     private LoaderInit(final String path) {
-	this.path = path;
+        this.path = path;
         this.userName = null;
         this.userPassword = null;
+        this.profile = null;
+        this.profiles = null;
         this.modified = false;
     }
 
@@ -153,6 +256,22 @@ public class LoaderInit {
      */
     void setUserPassword(final String userPassword) {
         this.userPassword = userPassword;
+    }
+
+    /**
+     * Set stored profile.
+     * @param profile Profile name to set.
+     */
+    void setProfile(final String profile) {
+        this.profile = profile;
+    }
+
+    /**
+     * Set list of existing game profiles.
+     * @param profiles List of existing game profiles to set.
+     */
+    void setProfiles(final LinkedList<Profile> profiles) {
+        this.profiles = profiles;
     }
 
 }

@@ -14,44 +14,72 @@ public class FileUtils {
     //public static final String MODULES_DIR = "mods";
 
     /**
-     * Create full path {@link String} from directory and file name.
+     * Create full path {@link String} from directory and file names.
      * @param dir  Directory to be prepended.
-     * @param file File name to be appended.
+     * @param file File names to be appended.
      * @return Full path {@link String}.
      */
-    public static String fullPath(final String dir, final String file) {
-        final boolean addSep = !dir.endsWith(File.separator) && !file.startsWith(File.separator);
-        final StringBuilder sb = new StringBuilder(dir.length() + file.length() + (addSep ? 1 : 0));
-        sb.append(dir);
-        if (addSep) {
-            sb.append(File.separator);
+    public static String fullPath(final String dir, final String... file) {
+        final boolean[] addSep = new boolean[file.length];
+        int sbLen = dir.length();
+        addSep[0] = !dir.endsWith(File.separator) && !file[0].startsWith(File.separator);
+        sbLen += file[0].length();
+        if (addSep[0]) {
+            sbLen += OS.FSEP_LEN;
         }
-        sb.append(file);
+        for (int i = 1; i < file.length; i++) {
+            addSep[i] = !file[i - 1].endsWith(File.separator) && !file[i].startsWith(File.separator);
+            sbLen += file[1].length();
+            if (addSep[0]) {
+                sbLen += OS.FSEP_LEN;
+            }
+        }
+        final StringBuilder sb = new StringBuilder(sbLen);
+        sb.append(dir);
+        for (int i = 0; i < file.length; i++) {
+            if (addSep[i]) {
+                sb.append(File.separator);
+            }
+            sb.append(file[i]);
+        }
+        return sb.toString();
+    }
+ 
+    /**
+     * Create full path {@link String} from directory and file names.
+     * @param dir  Directory to be prepended.
+     * @param suffix File suffix to be appended.
+     * @param file File names to be appended.
+     * @return Full path {@link String}.
+     */
+    public static String fullPathwithsuffix(final String dir, final String suffix, final String... file) {
+        final boolean[] addSep = new boolean[file.length];
+        int suffixLen = suffix != null ? suffix.length(): 0;
+        int sbLen = dir.length();
+        addSep[0] = !dir.endsWith(File.separator) && !file[0].startsWith(File.separator);
+        sbLen += file[0].length();
+        if (addSep[0]) {
+            sbLen += OS.FSEP_LEN;
+        }
+        for (int i = 1; i < file.length; i++) {
+            addSep[i] = !file[i - 1].endsWith(File.separator) && !file[i].startsWith(File.separator);
+            sbLen += file[1].length();
+            if (addSep[0]) {
+                sbLen += OS.FSEP_LEN;
+            }
+        }
+        final StringBuilder sb = new StringBuilder(sbLen + suffixLen);
+        sb.append(dir);
+        for (int i = 0; i < file.length; i++) {
+            if (addSep[i]) {
+                sb.append(File.separator);
+            }
+            sb.append(file[i]);
+        }
+        if (suffixLen > 0) {
+            sb.append(suffix);
+        }
         return sb.toString();
     }
 
-    /**
-     * Create full path {@link String} from directory, subdirectory and file name.
-     * @param dir    Directory to be prepended.
-     * @param subdir Directory to be appended in the middle.
-     * @param file   File name to be appended at the end.
-     * @return Full path {@link String}.
-     */
-    public static String fullPath(final String dir, final String subdir, final String file) {
-        final boolean addSepDir = !dir.endsWith(File.separator) && !subdir.startsWith(File.separator);
-        final boolean addSepFile = !subdir.endsWith(File.separator) && !file.startsWith(File.separator);
-        final int len = dir.length() + subdir.length() + file.length() + (addSepDir ? 1 : 0)+ (addSepFile ? 1 : 0);
-        final StringBuilder sb = new StringBuilder(len);
-        sb.append(dir);
-        if (addSepDir) {
-            sb.append(File.separator);
-        }
-        sb.append(subdir);
-        if (addSepFile) {
-            sb.append(File.separator);
-        }
-        sb.append(file);
-        return sb.toString();
-    }
-  
 }

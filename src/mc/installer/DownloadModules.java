@@ -50,17 +50,12 @@ public class DownloadModules extends AbstractDownload {
 
     /**
      * Downloading thread main method.
+     * @return Value of {@code true} if thread execution was finished successfully or {@code false} otherwise.
      */
     @Override
-    public void thread() {
-        File modsDir = new File(FileUtils.fullPath(path, modsPath));
-        if (!modsDir.exists()) {
-            boolean dirCreated = modsDir.mkdirs();
-            if (dirCreated) {
-                Logger.log(LogLevel.FINE, "Created: %s", modsDir.getAbsolutePath());
-            } else {
-                Logger.log(LogLevel.WARNING, "Could not create %s", modsDir.getAbsolutePath());
-            }
+    public boolean thread() {
+        if (!AbstractDownload.mkDir(new File(FileUtils.fullPath(path, modsPath)))) {
+            return false;
         }
         // Better to work with own copy in parallel thread.
         @SuppressWarnings("unchecked")
@@ -87,6 +82,7 @@ public class DownloadModules extends AbstractDownload {
             progress.moduleDone(mod);
 
         }
+        return true;
     }
 
 }

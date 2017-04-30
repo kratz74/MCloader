@@ -37,17 +37,15 @@ public class ModuleDownloadListener implements DownloadListener {
     /**
      * Mark downloading as ended.
      * Hide all related UI elements.
+     * @param result Thread execution result: Value of {@code true} if thread execution was finished successfully
+     *               or {@code false} otherwise.
      */
     @Override
-    public void end() {
-        ui.downloadLabel.setEnabled(false);
-        ui.downloadProgress.setEnabled(false);
-        //label.setVisible(false);
-        ui.downloadLabel.setVisible(false);
-        ui.downloadProgress.setVisible(false);
+    public void end(final boolean result) {
         ui.resetInstaller();
         ui.resetDownloadUI();
         ui.updateGameStatusForModules();
+        ui.updateGameComponentsVisibility();
     }
 
     /**

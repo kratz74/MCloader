@@ -6,6 +6,7 @@ package mc.config;
 import com.fasterxml.jackson.core.JsonToken;
 import java.io.File;
 import java.io.IOException;
+import mc.init.LoaderInit;
 import mc.json.JsonReader;
 import mc.log.LogLevel;
 import mc.log.Logger;
@@ -26,29 +27,39 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
      * Reads loader configuration file.
      * @return Configuration file content as {@link LoaderConfig} instance.
      */
-    public static LoaderConfig read() { 
-	ConfigReader r = null;
-	try {
-            Logger.log(LogLevel.FINE, "Reading configuration resource: %s", CONFIG_RESOURCE_PATH);
-	    r = new ConfigReader(CONFIG_RESOURCE_PATH);
-	    r.parse();
-	} catch (IOException ioe) {
-            Logger.log(LogLevel.WARNING, "Error reading configuration file: %s", ioe);
-	} finally {
-	    if (r != null) {
-		r.close();
-	    }
-	}
+    public static LoaderConfig read() {
+        final String filePath = LoaderInit.getCurrentConfigFile(null);
+        ConfigReader r = null;
+        if (filePath != null) {
+            final File file = new File(filePath);
+            if (file.canRead()) {
+                Logger.log(LogLevel.FINE, "Reading configuration file: %s", file.getAbsolutePath());
+                try {
+                    r = new ConfigReader(file);
+                    r.parse();
+                } catch (IOException ioe) {
+                    Logger.log(LogLevel.WARNING, "Error reading configuration file: %s", ioe);
+                } finally {
+                    if (r != null) {
+                        r.close();
+                    }
+                }
+            } else {
+                Logger.log(LogLevel.INFO, "Configuration file %s was not found", file.getAbsolutePath());
+            }
+        } else {
+            Logger.log(LogLevel.INFO, "Configuration file does not exist yet");
+        }
         return r != null ? r.getData() : null;
     }
 
     /**
      * Creates an instance of loader configuration parser.
-     * @param resource Loader configuration file path on class path.
+     * @param file Configuration file to read.
      * @throws java.io.IOException when JSON parser cannot be initialized.
      */
-    public ConfigReader(final String resource) throws IOException {
-        super(ConfigReader.class.getResourceAsStream(resource), new LoaderConfig());
+    public ConfigReader(final File file) throws IOException {
+        super(file, new LoaderConfig());
     }
 
     /**

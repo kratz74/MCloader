@@ -30,14 +30,14 @@ public class LoaderConfig {
         /** Mod download URL. */
 	private final String url;
 
-	/**
-	 * Creates an instance of mod configuration element.
-	 * @param file Mod file name.
+        /**
+         * Creates an instance of mod configuration element.
+         * @param file Mod file name.
          * @param chkSum Module file checksum (Adler32).
-	 * @param url  Mod download URL.
-	 */
-	Mod(final String file, final String chkSum, final String url) {
-	    this.file = file;
+         * @param url Mod download URL.
+         */
+        Mod(final String file, final String chkSum, final String url) {
+            this.file = file;
             long ad32;
             try {
                 ad32 = Long.parseLong(chkSum, 0x10);
@@ -46,8 +46,8 @@ public class LoaderConfig {
                 ad32 = 0;
             }
             this.chkSum = ad32;
-	    this.url = url;
-	}
+            this.url = url;
+        }
 
 	/**
 	 * Get mod file name.
@@ -85,7 +85,14 @@ public class LoaderConfig {
     }
 
     /** Loader configuration instance. Configuration data are stored in static context for whole application. */
-    private static final LoaderConfig CONFIG = ConfigReader.read();
+    private static LoaderConfig CONFIG = ConfigReader.read();
+
+    /**
+     * Update loader configuration depending on current profile.
+     */
+    public static void update() {
+        CONFIG = ConfigReader.read();
+    }
 
     /**
      * Get Java options list.
@@ -151,6 +158,14 @@ public class LoaderConfig {
         return CONFIG.startupClass;
     }
 
+    /**
+     * Check whether configuration exists.
+     * @return Value of {@code true} when configuration exists or {@code false} otherwise.
+     */
+    public static boolean isConfig() {
+        return CONFIG != null;
+    }
+
     /** Java options list. */
     private final LinkedList<Property> javaOptions;
 
@@ -181,9 +196,9 @@ public class LoaderConfig {
     LoaderConfig() {
         javaOptions = new LinkedList<>();
         properties = new LinkedList<>();
-	classpath = new LinkedList<>();
+        classpath = new LinkedList<>();
         arguments = new LinkedList<>();
-	mods = new LinkedList<>();
+        mods = new LinkedList<>();
         gameUrl = null;
         startupClass = null;
     }

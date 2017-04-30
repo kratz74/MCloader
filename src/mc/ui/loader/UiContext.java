@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mc.config.LoaderConfig;
 import mc.init.LoaderInit;
+import mc.init.Profile;
 import mc.installer.GameCheck;
 
 /**
@@ -18,6 +19,9 @@ public class UiContext {
     /** Game modules that are not OK. */
     LinkedList<LoaderConfig.Mod> modsToFix;
 
+    /** Profiles. */
+    LinkedList<Profile> profiles;
+
     /** Exit launcher check box state. */
     boolean exitLauncher;
     
@@ -25,8 +29,13 @@ public class UiContext {
      * Creates a new instance of UI context.
      */
     public UiContext() {
-        this.modsToFix = GameCheck.checkModules(
-                LoaderInit.getPath(), LoaderConfig.getModsPath(), LoaderConfig.getMods());
+        if (LoaderConfig.isConfig() && LoaderInit.getPath() != null) {
+            this.modsToFix = GameCheck.checkModules(
+                    LoaderInit.getPath(), LoaderConfig.getModsPath(), LoaderConfig.getMods());
+        } else {
+            this.modsToFix = null;
+        }
+        
         this.exitLauncher = false;
     }
 

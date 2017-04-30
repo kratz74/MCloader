@@ -97,20 +97,35 @@ class InitReader extends JsonReader<LoaderInit> {
     }
 
     /**
+     * Process profile String.
+     * <p>
+     * {@code "profile": "<profile_name>"
+     */
+    private void profile() throws IOException {
+        next();
+        if (token != JsonToken.VALUE_STRING) {
+            throw new IOException("Expected profile name String value");
+        }
+        String profile = parser.getText();
+        data.setProfile(profile);
+        Logger.log(LogLevel.FINEST, 1, "Profile: %s", profile);
+    }
+
+    /**
      * Parses initialization file.
      * @throws java.io.IOException
      */
     @Override
     public void parse() throws IOException {
-	next();
-	if (token != JsonToken.START_OBJECT) {
-	    throw new IOException("Missing starting '{' symbol");
-	}
+        next();
+        if (token != JsonToken.START_OBJECT) {
+            throw new IOException("Missing starting '{' symbol");
+        }
         boolean process = true;
         // Next token shall be top level field name or end.
-	while (process) {
+        while (process) {
             next();
-	    switch (token) {
+            switch (token) {
                 case FIELD_NAME:
                     final String name = parser.getCurrentName();
                     if ("path".equals(name.toLowerCase())) {
@@ -122,6 +137,9 @@ class InitReader extends JsonReader<LoaderInit> {
                     if ("userpassword".equals(name.toLowerCase())) {
                         userPassword();
                     }
+                    if ("profile".equals(name.toLowerCase())) {
+                        profile();
+                    }
                     break;
                 case END_OBJECT:
                     process = false;
@@ -130,7 +148,7 @@ class InitReader extends JsonReader<LoaderInit> {
                     throw new IOException("Expected field name or ending '}' symbol but got " + token.toString());
             }
         }
-	parsingDone = true;
+        parsingDone = true;
     }
 
 }
