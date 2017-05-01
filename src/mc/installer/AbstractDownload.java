@@ -243,6 +243,7 @@ public abstract class AbstractDownload implements Downloader, Runnable {
      */
     @Override
     public void start() {
+        //new Exception().printStackTrace();
         this.execute = true;
         this.isRunning = true;
         this.thread = new Thread(this, threadName());

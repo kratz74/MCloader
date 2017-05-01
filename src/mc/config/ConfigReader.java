@@ -20,9 +20,6 @@ public class ConfigReader extends JsonReader<LoaderConfig> {
     /** Loader configuration file name. */
     private static final String CONFIG_FILE = "loader.json";
 
-    /** Loader configuration file path on class path. */
-    private static final String CONFIG_RESOURCE_PATH = "/mc/config/" + CONFIG_FILE;
-    
     /**
      * Reads loader configuration file.
      * @return Configuration file content as {@link LoaderConfig} instance.

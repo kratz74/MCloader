@@ -29,13 +29,13 @@ public class UiContext {
      * Creates a new instance of UI context.
      */
     public UiContext() {
-        if (LoaderConfig.isConfig() && LoaderInit.getPath() != null) {
-            this.modsToFix = GameCheck.checkModules(
-                    LoaderInit.getPath(), LoaderConfig.getModsPath(), LoaderConfig.getMods());
-        } else {
+//        if (LoaderConfig.isConfig() && LoaderInit.getPath() != null) {
+//            this.modsToFix = GameCheck.checkModules(
+//                    LoaderInit.getPath(), LoaderConfig.getModsPath(), LoaderConfig.getMods());
+//        } else {
             this.modsToFix = null;
-        }
-        
+//        }
+//        
         this.exitLauncher = false;
     }
 
@@ -99,6 +99,20 @@ public class UiContext {
      */
     public boolean getExitGame() {
         return exitLauncher;
+    }
+
+    /**
+     * Do some modules for fixing exist?
+     */
+    boolean isModules() {
+        return !(this.modsToFix == null || this.modsToFix.isEmpty());
+    }
+
+    /**
+     * Do some modules for fixing exist?
+     */
+    boolean noModules() {
+        return this.modsToFix != null && this.modsToFix.isEmpty();
     }
 
 }

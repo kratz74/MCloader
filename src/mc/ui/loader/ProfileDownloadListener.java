@@ -29,6 +29,8 @@ public class ProfileDownloadListener implements DownloadListener {
      */
     @Override
     public void begin() {
+        ui.installationState = LoaderFrame.GameState.NO_PROFILE;
+        ui.buttonInstall.setEnabled(false);
         ui.profileProgressLabel.setVisible(true);
         ui.profileProgressLabel.setEnabled(true);
         ui.profleProgress.setVisible(true);
@@ -43,6 +45,7 @@ public class ProfileDownloadListener implements DownloadListener {
      */
     @Override
     public void end(final boolean result) {
+        ui.isInit = false;
         if (result) {
             LoaderInit.updateProfiles();
         }

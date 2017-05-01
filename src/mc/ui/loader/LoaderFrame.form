@@ -266,7 +266,7 @@
                                   <Component id="downloadProgress" alignment="0" pref="411" max="32767" attributes="0"/>
                                   <Group type="102" alignment="1" attributes="0">
                                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                      <Component id="buttonInstall" min="-2" pref="120" max="-2" attributes="0"/>
+                                      <Component id="buttonInstall" min="-2" pref="150" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -335,7 +335,7 @@
                   <Font name="Lucida Grande" size="13" style="1"/>
                 </Property>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="Messages.get(&quot;ui.dir.button.install&quot;)" type="code"/>
+                  <Connection code="installButtonLabel()" type="code"/>
                 </Property>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
@@ -359,7 +359,9 @@
               <SubComponents>
                 <Component class="javax.swing.JTextPane" name="downloadModsList">
                   <Properties>
-                    <Property name="editable" type="boolean" value="false"/>
+                    <Property name="editable" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="false" type="code"/>
+                    </Property>
                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                       <Color blue="ee" green="ee" red="ee" type="rgb"/>
                     </Property>

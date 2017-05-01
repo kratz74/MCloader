@@ -24,6 +24,7 @@ import mc.installer.GameCheck;
 import mc.locale.Messages;
 import mc.log.LogLevel;
 import mc.log.Logger;
+import mc.utils.FileUtils;
 import mc.utils.OS;
 import mc.utils.PasswordUtils;
 import mc.utils.Version;
@@ -34,7 +35,7 @@ import mc.utils.Version;
  */
 public class LoaderFrame extends javax.swing.JFrame {
 
-    private static enum GameState {
+    static enum GameState {
         /** Game profile was not selected. */
         NO_PROFILE,
         /** Game installation path does not exist. */
@@ -166,8 +167,6 @@ public class LoaderFrame extends javax.swing.JFrame {
 
     /** Content of profiles select box. */
     Profile[] profilesContent;
-    /** Download change listener. */
-//    final DownloadListener downloadListener;
 
     private Profile[] buildProfilesContent() {
         LinkedList<Profile> profiles = LoaderInit.getProfiles();
@@ -185,6 +184,9 @@ public class LoaderFrame extends javax.swing.JFrame {
     /** User password is OK for the game. Cache for checks without user modification. */
     boolean passCheckCache;
 
+    /** Mark UI initialization phase. */
+    boolean isInit;
+
     /** Current game installation state depending on indicators. */
     GameState installationState;
     
@@ -199,15 +201,16 @@ public class LoaderFrame extends javax.swing.JFrame {
      * @param ctx UI context.
      */
     public LoaderFrame(final UiContext ctx) {
+        isInit = true;
         this.ctx = ctx;
         check = new GameCheck();
         profilesContent = buildProfilesContent();
         profileExists = LoaderInit.getProfiles() != null && LoaderInit.getProfiles().size() > 0 && LoaderInit.getProfile() != null;
         pathExists = profileExists && check.checkInstallDir(LoaderInit.getPath());
-        gameCheckCache = pathExists && LoaderInit.getPath() != null && check.check(LoaderInit.getPath());
+        gameCheckCache = false;
         userCheckCache = checkUserName(LoaderInit.getUserName());
         passCheckCache = checkUserPassword(LoaderInit.getUserPassword());
-        installationState = GameState.gameState(profileExists, pathExists, gameCheckCache, ctx.modsToFix);
+        installationState = profileExists ? GameState.NO_PATH : GameState.NO_PROFILE;
         logoPicure = readImage();
         directoryChooser = createDirectoryChooser();
         Logger.log(LogLevel.FINE, "Game start is %senabled", startEnabled() ? "" : "not ");
@@ -215,6 +218,15 @@ public class LoaderFrame extends javax.swing.JFrame {
         Logger.log(LogLevel.FINEST, "  User name: %s", userCheckCache ? "OK" : "Not OK ");
         Logger.log(LogLevel.FINEST, "  Password:  %s", passCheckCache ? "OK" : "Not OK ");
         initComponents();
+        if (installationState != GameState.NO_PROFILE) {
+            final Profile profile = LoaderInit.getCurrentProfile();
+            profileDownloader = new DownloadProfile(
+                    LoaderInit.getCurrentConfigFile(profile), LoaderInit.getCurrentConfigURL(profile),
+                    new ProfileDownloadListener(this));
+            profileDownloader.start();
+        } else {
+            profileDownloader = null;
+        }
         updateProfilesSelectBox(false);
         profileDownloader = null;
         installer = null;
@@ -235,7 +247,7 @@ public class LoaderFrame extends javax.swing.JFrame {
      * @return Value of {@code true} when {@code Start} button shall be enabled or {@code false} otherwise.
      */
     private boolean startEnabled() {
-        return userCheckCache && passCheckCache && gameCheckCache && ctx.modsToFix.isEmpty();
+        return userCheckCache && passCheckCache && gameCheckCache && ctx.noModules();
     }
 
     /**
@@ -243,7 +255,7 @@ public class LoaderFrame extends javax.swing.JFrame {
      * @return Value of {@code true} when {@code Install} button shall be enabled or {@code false} otherwise.
      */
     private boolean installEnabled() {
-        return LoaderConfig.isConfig() && installationState != GameState.OK && installer == null;
+        return LoaderConfig.isConfig() && installationState != GameState.OK && installer == null && profileDownloader == null;
     }
 
     /**
@@ -295,6 +307,22 @@ public class LoaderFrame extends javax.swing.JFrame {
     }
 
     /**
+     * Install button label
+     */
+    private String installButtonLabel() {
+        switch(installationState) {
+            case NO_PROFILE:
+            case NO_PATH:
+            case INSTALL:
+                return Messages.get("ui.dir.button.install.base");
+            case MODULES:
+            case OK:
+                return Messages.get("ui.dir.button.install.modules");
+            default: throw new IllegalStateException("Unknown game installation state");
+        }
+    }
+
+    /**
      * Modules status message.
      * @return UI message depending on current modules status.
      */
@@ -324,8 +352,12 @@ public class LoaderFrame extends javax.swing.JFrame {
     final void updateProfilesSelectBox(final boolean updateContent) {
         if (updateContent) {
             profilesContent = buildProfilesContent();
+            profilesBox.setEnabled(true);
+        } else {
+            profilesBox.setEnabled(false);
         }
         profilesBox.removeAllItems();
+        isInit = false;
         if (profilesContent != null) {
             String current = LoaderInit.getProfile();
             for (Profile profile : profilesContent) {
@@ -372,31 +404,36 @@ public class LoaderFrame extends javax.swing.JFrame {
      * @return String containing list of modules to be installed.
      */
     private String modulesToInstallText() {
+        Logger.log(LogLevel.INFO, "Building modules list for state: %s.", installationState.name());
         switch(installationState) {
             case NO_PROFILE:
-                return "No profile selected";
-            case NO_PATH:
                 return "";
+            case NO_PATH:
+                return "Base game";
             case INSTALL:
                 return "Base game";
             case MODULES:
-                StringBuilder sb = new StringBuilder();
-                boolean first = true;
-                for (LoaderConfig.Mod mod : ctx.modsToFix) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        sb.append('\n');
+                if (ctx.isModules()) {
+                    StringBuilder sb = new StringBuilder();
+                    boolean first = true;
+                    for (LoaderConfig.Mod mod : ctx.modsToFix) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            sb.append('\n');
+                        }
+                        sb.append(' ');
+                        int from = mod.getFile().lastIndexOf(File.separatorChar);
+                        if (from >= 0) {
+                            sb.append(mod.getFile().substring(from + 1));
+                        } else {
+                            sb.append(mod.getFile());
+                        }
                     }
-                    sb.append(' ');
-                    int from = mod.getFile().lastIndexOf(File.separatorChar);
-                    if (from >= 0) {
-                        sb.append(mod.getFile().substring(from+1));
-                    } else {
-                        sb.append(mod.getFile());
-                    }
+                    return sb.toString();
+                } else {
+                    return "";
                 }
-                return sb.toString();
             case OK:
                 return "";
             default: throw new IllegalStateException("Unknown game installation state");
@@ -418,6 +455,11 @@ public class LoaderFrame extends javax.swing.JFrame {
     private Downloader initDownloader() {
         switch(installationState) {
             case NO_PATH:
+                    if (FileUtils.mkDirs(new File(path.getText()))) {
+                        installationState = GameState.gameState(profileExists, pathExists, gameCheckCache, ctx.modsToFix);
+                        downloadModsList.setText(modulesToInstallText());
+                        
+                    }
             case INSTALL: return new DownloadBase(
                     path.getText(), LoaderConfig.getGameUrl(), new BaseDownloadListener(this));
             case MODULES: return new DownloadModules(
@@ -453,6 +495,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                 profileDownloader = new DownloadProfiles(
                         LoaderInit.PROFILES_PATH, LoaderInit.PROFILES_URL, new ProfilesDownloadListener(this));
                 profileDownloader.start();
+                downloadModsList.setEnabled(false);
                 break;
             case INSTALL:
                 userNameLabel.setEnabled(false);
@@ -463,12 +506,13 @@ public class LoaderFrame extends javax.swing.JFrame {
                 passwordLabel.setVisible(true);
                 password.setEnabled(false);
                 password.setVisible(true);
-               profileLabel.setEnabled(true);
+                profileLabel.setEnabled(true);
                 profileLabel.setVisible(true);
                 profilesBox.setEnabled(true);
                 profilesBox.setVisible(true);
                 buttonStart.setEnabled(startEnabled());
                 buttonInstall.setEnabled(installEnabled());
+                downloadModsList.setEnabled(true);
                 break;
             case MODULES:
                 userNameLabel.setEnabled(false);
@@ -485,6 +529,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                 profilesBox.setVisible(true);
                 buttonStart.setEnabled(startEnabled());
                 buttonInstall.setEnabled(installEnabled());
+                downloadModsList.setEnabled(true);
                 break;
             case NO_PATH:
                 userNameLabel.setEnabled(false);
@@ -501,6 +546,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                 profilesBox.setVisible(true);
                 buttonStart.setEnabled(startEnabled());
                 buttonInstall.setEnabled(installEnabled());
+                downloadModsList.setEnabled(true);
                 break;
             case OK:
                 userNameLabel.setEnabled(true);
@@ -517,6 +563,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                 profilesBox.setVisible(true);
                 buttonStart.setEnabled(startEnabled());
                 buttonInstall.setEnabled(installEnabled());
+                downloadModsList.setEnabled(false);
                 break;
             default:
                 throw new IllegalStateException("Unknown game installation state");
@@ -525,6 +572,9 @@ public class LoaderFrame extends javax.swing.JFrame {
         profileProgressLabel.setEnabled(profileDownloadEnabled());
         profleProgress.setVisible(profileDownloadEnabled());
         profleProgress.setEnabled(profileDownloadEnabled());
+        profileLabel.setForeground(profileLabelColor());
+        pathLabel.setForeground(pathLabelColor());
+        buttonInstall.setText(installButtonLabel());
     }
 
     /**
@@ -646,13 +696,14 @@ public class LoaderFrame extends javax.swing.JFrame {
         downloadLabel.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
 
         buttonInstall.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
-        buttonInstall.setText(Messages.get("ui.dir.button.install"));
+        buttonInstall.setText(installButtonLabel());
         buttonInstall.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonInstallActionPerformed(evt);
             }
         });
 
+        downloadModsList.setEditable(false);
         downloadModsList.setBackground(new java.awt.Color(238, 238, 238));
         downloadModsList.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         downloadModsList.setText(modulesToInstallText());
@@ -693,7 +744,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                             .addComponent(downloadProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 411, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, installLayout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(buttonInstall, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(buttonInstall, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(modulesList, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(installLayout.createSequentialGroup()
@@ -886,31 +937,33 @@ public class LoaderFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_buttonSelectActionPerformed
 
     private void profileBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_profileBoxActionPerformed
-        @SuppressWarnings("unchecked")
-        final javax.swing.JComboBox<Profile> cb = (javax.swing.JComboBox<Profile>)evt.getSource();
-        final Profile selected = (Profile)cb.getSelectedItem();
-        if (selected != null) {
-            final String current = LoaderInit.getProfile();
-            final String gameDir = selected.getDirectory();
-            if (current == null || !current.equalsIgnoreCase(gameDir)) {
-                LoaderInit.updateProfile(gameDir);
-                final String gamePath = OS.getGameDir(gameDir);
-                LoaderInit.updatePath(gamePath);
-                profileExists = LoaderInit.getProfile() != null;
-                path.setText(gamePath);
-                pathExists = check.checkInstallDir(gamePath);
-                gameCheckCache = pathExists && gamePath != null && check.check(gamePath);
-                installationState = GameState.gameState(profileExists, pathExists, gameCheckCache, ctx.modsToFix);
-                pathLabel.setForeground(pathLabelColor());
-                buttonStart.setEnabled(startEnabled());
-                gameState.setForeground(modulesStatusColor());
-                gameState.setText(gameStatusMesage());
-                updateGameComponentsVisibility();
-                final Profile profile = LoaderInit.getCurrentProfile();
-                profileDownloader = new DownloadProfile(
-                        LoaderInit.getCurrentConfigFile(profile), LoaderInit.getCurrentConfigURL(profile),
-                        new ProfileDownloadListener(this));
-                profileDownloader.start();
+        if (!isInit) {
+            @SuppressWarnings("unchecked")
+            final javax.swing.JComboBox<Profile> cb = (javax.swing.JComboBox<Profile>) evt.getSource();
+            final Profile selected = (Profile) cb.getSelectedItem();
+            if (selected != null) {
+                final String current = LoaderInit.getProfile();
+                final String gameDir = selected.getDirectory();
+                if (current == null || !current.equalsIgnoreCase(gameDir)) {
+                    LoaderInit.updateProfile(gameDir);
+                    final String gamePath = OS.getGameDir(gameDir);
+                    LoaderInit.updatePath(gamePath);
+                    profileExists = LoaderInit.getProfile() != null;
+                    path.setText(gamePath);
+                    pathExists = check.checkInstallDir(gamePath);
+                    gameCheckCache = pathExists && gamePath != null && check.check(gamePath);
+                    installationState = GameState.gameState(profileExists, pathExists, gameCheckCache, ctx.modsToFix);
+                    pathLabel.setForeground(pathLabelColor());
+                    buttonStart.setEnabled(startEnabled());
+                    gameState.setForeground(modulesStatusColor());
+                    gameState.setText(gameStatusMesage());
+                    updateGameComponentsVisibility();
+                    final Profile profile = LoaderInit.getCurrentProfile();
+                    profileDownloader = new DownloadProfile(
+                            LoaderInit.getCurrentConfigFile(profile), LoaderInit.getCurrentConfigURL(profile),
+                            new ProfileDownloadListener(this));
+                    profileDownloader.start();
+                }
             }
         }
     }//GEN-LAST:event_profileBoxActionPerformed

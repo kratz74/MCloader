@@ -82,4 +82,18 @@ public class FileUtils {
         return sb.toString();
     }
 
+    /**
+     * Create directory structure on file system.
+     * @param path Path of directory structure to be created.
+     * @return Value of {@code true} if and only if the directory was created, along with all necessary parent directories
+     *         or {@code false} otherwise.
+     */
+    public static boolean mkDirs(final File path) {
+        if (!path.exists()) {
+            return path.mkdirs();
+        } else {
+            return false;
+        }
+    }
+
 }
