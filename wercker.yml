@@ -1,0 +1,16 @@
+box: maven
+dev:
+  steps:
+    - script:
+      name: dev build
+      code: |
+        mvn clean package
+
+# Build definition
+build:
+  # The steps that will be executed on build
+  steps:
+    - script:
+        name: continuous build
+        code: |
+          mvn clean package
