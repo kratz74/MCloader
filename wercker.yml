@@ -1,4 +1,4 @@
-box: library/maven:latest
+box: maven
 
 dev:
   steps:
