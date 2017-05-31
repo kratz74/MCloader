@@ -1,6 +1,5 @@
-box:
-  id: library/maven
-  tag: latest
+box: library/maven:latest
+
 dev:
   steps:
     - script:
