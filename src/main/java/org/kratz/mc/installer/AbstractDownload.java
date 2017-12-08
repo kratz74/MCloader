@@ -191,6 +191,11 @@ public abstract class AbstractDownload implements Downloader, Runnable {
             AbstractDownload.close(out);
         }
         if (transferOk) {
+            if (target.exists()) {
+                if (!target.delete()) {
+                    Logger.log(LogLevel.WARNING, 1, "Cold not delete %s, keeping old file", target.getName());
+                }
+            }
             tmpPath.renameTo(target);
             Logger.log(LogLevel.FINE, 1, "Downloaded: %s -> %s", tmpPath.getAbsolutePath(), target.getName());
             return true;
