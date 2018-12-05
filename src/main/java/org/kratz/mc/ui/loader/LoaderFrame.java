@@ -7,18 +7,16 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.Arrays;
 import java.util.LinkedList;
-
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
-import javax.swing.text.StyledDocument;
-
 import org.kratz.mc.config.LoaderConfig;
 import org.kratz.mc.init.LoaderInit;
 import org.kratz.mc.init.Profile;
-import org.kratz.mc.installer.AbstractDownload;
 import org.kratz.mc.installer.DownloadBase;
 import org.kratz.mc.installer.DownloadModules;
 import org.kratz.mc.installer.DownloadProfile;
@@ -30,6 +28,7 @@ import org.kratz.mc.log.LogLevel;
 import org.kratz.mc.log.Logger;
 import org.kratz.mc.utils.FileUtils;
 import org.kratz.mc.utils.OS;
+import org.kratz.mc.utils.OSUtils;
 import org.kratz.mc.utils.PasswordUtils;
 import org.kratz.mc.utils.Version;
 
@@ -160,6 +159,49 @@ public class LoaderFrame extends javax.swing.JFrame {
         return directoryChooser;
     }
 
+    /**
+     * Returns HTTP proxy port to be set into form field.
+     * @return HTTP proxy port to be set into form field.
+     */
+    private static String getHTTPProxyPort() {
+        int port = LoaderInit.getHttpProxyPort();
+        if (port >= 0) {
+            return Integer.toString(port);
+        }
+        port = OS.getHTTPProxyPort();
+        if (port >= 0) {
+            return Integer.toString(port);
+        }
+        final String host = OS.getHTTPProxyHost();
+        return host != null && host.length() > 0 ? "80" : "";
+    }
+
+    /**
+     * Returns HTTP proxy host to be set into form field.
+     * @return HTTP proxy host to be set into form field.
+     */
+    private static String getHTTPProxyHost() {
+        String host = LoaderInit.getHttpProxyHost();
+        if (host != null && host.length() > 0) {
+            return host;
+        }
+        host = OS.getHTTPProxyHost();
+        return host != null ? host : "";
+    }
+
+    /**
+     * Returns HTTP proxy host to be used for profiles download during initialization.
+     * @return HTTP proxy host to be used for profiles download during initialization.
+     */
+    private static int getHTTPProxyPortNum() {
+        int port = LoaderInit.getHttpProxyPort();
+        if (port >= 0) {
+            return port;
+        }
+        port = OS.getHTTPProxyPort();
+        return port >= 0 ? port : 80;
+    }
+
     /** Loader initialization object. */
     final UiContext ctx;
     /** Game installation check. */
@@ -226,7 +268,7 @@ public class LoaderFrame extends javax.swing.JFrame {
             final Profile profile = LoaderInit.getCurrentProfile();
             profileDownloader = new DownloadProfile(
                     LoaderInit.getCurrentConfigFile(profile), LoaderInit.getCurrentConfigURL(profile),
-                    new ProfileDownloadListener(this), AbstractDownload.systemProxy());
+                    new ProfileDownloadListener(this), OSUtils.customHTTPProxy(getHTTPProxyHost(), getHTTPProxyPortNum()));
             profileDownloader.start();
         } else {
             profileDownloader = null;
@@ -238,7 +280,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         initDownloadComponents();
         // Switch logger to UI
         logText.setEditable(false);
-        Logger.ui(logText.getDocument());
+        Logger.initUi(logText.getDocument());
     }
 
     /**
@@ -397,7 +439,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         ctx.checkModules(path.getText());
         installationState = GameState.gameState(profileExists, pathExists, gameCheckCache, ctx.modsToFix);
     }
-    
+
     /**
      * Update UI content after module download is finished.
      * @param mod Finished module.
@@ -456,6 +498,44 @@ public class LoaderFrame extends javax.swing.JFrame {
     }
 
     /**
+     * Builds proxy instance from form fields.
+     * @return Proxy instance from form fields or <code>null</code> if no proxy instance was found.
+     */
+    private Proxy getProxy() {
+        final String host = getProxyHost();
+        int port = getProxyPort();
+        if (host != null && port >= 0 && port <= 65535) {
+            return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Builds proxy host instance from form field.
+     * @return Proxy host instance from form field.
+     */
+    private String getProxyHost() {
+        final String host = proxyHost.getText();
+        return host != null && host.length() > 0 ? host : null;
+    }
+    
+    /**
+     * Builds proxy host instance from form field.
+     * @return Proxy host instance from form field.
+     */
+    private int getProxyPort() {
+        final String portStr = proxyPort.getText();
+        int port;
+        try {
+            port = Integer.parseInt(portStr);
+        } catch (NumberFormatException ex) {
+            port = -1;
+        }
+        return port <= 65535 ? port : -1;
+    }
+
+    /**
      * Initialize {@link Downloader} component depending on current game installation state.
      * @return {@link Downloader} component depending on current game installation state.
      */
@@ -465,12 +545,11 @@ public class LoaderFrame extends javax.swing.JFrame {
                     if (FileUtils.mkDirs(new File(path.getText()))) {
                         installationState = GameState.gameState(profileExists, pathExists, gameCheckCache, ctx.modsToFix);
                         downloadModsList.setText(modulesToInstallText());
-                        
                     }
             case INSTALL: return new DownloadBase(
-                    path.getText(), LoaderConfig.getGameUrl(), new BaseDownloadListener(this), null);
+                    path.getText(), LoaderConfig.getGameUrl(), new BaseDownloadListener(this), getProxy());
             case MODULES: return new DownloadModules(
-                    path.getText(), LoaderConfig.getModsPath(), ctx.modsToFix, new ModuleDownloadListener(this), null);
+                    path.getText(), LoaderConfig.getModsPath(), ctx.modsToFix, new ModuleDownloadListener(this), getProxy());
             case NO_PROFILE:
             case OK: return null;
             default: throw new IllegalStateException("Unknown game installation state");
@@ -764,9 +843,9 @@ public class LoaderFrame extends javax.swing.JFrame {
         proxyPortLabel.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         proxyPortLabel.setText(Messages.get("ui.proxy.label.port"));
 
-        proxyHost.setText("jTextField1");
+        proxyHost.setText(getHTTPProxyHost());
 
-        proxyPort.setText("jTextField2");
+        proxyPort.setText(getHTTPProxyPort());
 
         javax.swing.GroupLayout installLayout = new javax.swing.GroupLayout(install);
         install.setLayout(installLayout);
@@ -937,21 +1016,28 @@ public class LoaderFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void buttonStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonStartActionPerformed
-        String newUserName = userName.getText();
+        final String newUserName = userName.getText();
         if (!newUserName.equals(LoaderInit.getUserName())) {
             LoaderInit.updateUserName(newUserName);
         }
-        String newPassword = PasswordUtils.encrypt(password.getPassword());
+        final String newPassword = PasswordUtils.encrypt(password.getPassword());
         if (!newPassword.equals(LoaderInit.getUserPassword())) {
             LoaderInit.updateUserPassword(newPassword);
         }
-        String newPath = path.getText();
+        final String newPath = path.getText();
         if (!newPath.equals(LoaderInit.getPath())) {
             LoaderInit.updatePath(newPath);
+        }
+        final String localProxyHost = getProxyHost();
+        int localProxyPort = getProxyPort();
+        if (localProxyHost != null && localProxyPort >= 0 && localProxyPort <= 65535) {
+           LoaderInit.updateHttpProxyHost(localProxyHost);
+           LoaderInit.updateHttpProxyPort(localProxyPort);
         }
         ctx.exitLauncher = exitCheckBox.isSelected();
         this.setVisible(false);
         this.dispose();
+        Logger.closeUi();
         ctx.wakeUp();
     }//GEN-LAST:event_buttonStartActionPerformed
 
@@ -1033,7 +1119,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                     final Profile profile = LoaderInit.getCurrentProfile();
                     profileDownloader = new DownloadProfile(
                             LoaderInit.getCurrentConfigFile(profile), LoaderInit.getCurrentConfigURL(profile),
-                            new ProfileDownloadListener(this), null);
+                            new ProfileDownloadListener(this), getProxy());
                     profileDownloader.start();
                 }
             }

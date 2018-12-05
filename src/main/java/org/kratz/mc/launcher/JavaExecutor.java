@@ -65,13 +65,69 @@ public class JavaExecutor {
         }
     }
 
+    /** HTTP proxy host Java property name. */
+    private static final String JAVA_HTTP_PROXY_HOST_PROP = "http.proxyHost";
+
+    /** HTTP proxy port Java property name. */
+    private static final String JAVA_HTTP_PROXY_PORT_PROP = "http.proxyPort";
+
+    /** HTTP proxy host Java property name. */
+    private static final String JAVA_HTTPS_PROXY_HOST_PROP = "https.proxyHost";
+
+    /** HTTP proxy port Java property name. */
+    private static final String JAVA_HTTPS_PROXY_PORT_PROP = "https.proxyPort";
+
+    /**
+     * 
+     * @param arguments 
+     */
+    private static void addProxyProperties(final LinkedList<String> arguments) {
+        final String host = LoaderInit.getHttpProxyHost();
+        if (host != null && host.length() > 0) {
+            StringBuilder sb = new StringBuilder(
+                    JAVA_HTTP_PROXY_HOST_PROP.length() + JAVA_PROPERTY_PREFIX.length()
+                    + host.length() + JAVA_OPTION_ASSIGN.length());
+            sb.append(JAVA_PROPERTY_PREFIX);
+            sb.append(JAVA_HTTP_PROXY_HOST_PROP);
+            sb.append(JAVA_OPTION_ASSIGN);
+            sb.append(host);
+            arguments.add(sb.toString());
+            final int port = LoaderInit.getHttpProxyPort();
+            final String portStr = port >= 0 ? Integer.toString(port) : "80";
+            sb = new StringBuilder(
+                    JAVA_HTTP_PROXY_PORT_PROP.length() + JAVA_PROPERTY_PREFIX.length()
+                    + portStr.length() + JAVA_OPTION_ASSIGN.length());
+            sb.append(JAVA_PROPERTY_PREFIX);
+            sb.append(JAVA_HTTP_PROXY_PORT_PROP);
+            sb.append(JAVA_OPTION_ASSIGN);
+            sb.append(portStr);
+            arguments.add(sb.toString());
+            sb = new StringBuilder(
+                    JAVA_HTTPS_PROXY_HOST_PROP.length() + JAVA_PROPERTY_PREFIX.length()
+                    + host.length() + JAVA_OPTION_ASSIGN.length());
+            sb.append(JAVA_PROPERTY_PREFIX);
+            sb.append(JAVA_HTTPS_PROXY_HOST_PROP);
+            sb.append(JAVA_OPTION_ASSIGN);
+            sb.append(host);
+            arguments.add(sb.toString());
+            sb = new StringBuilder(
+                    JAVA_HTTPS_PROXY_PORT_PROP.length() + JAVA_PROPERTY_PREFIX.length()
+                    + portStr.length() + JAVA_OPTION_ASSIGN.length());
+            sb.append(JAVA_PROPERTY_PREFIX);
+            sb.append(JAVA_HTTPS_PROXY_PORT_PROP);
+            sb.append(JAVA_OPTION_ASSIGN);
+            sb.append(portStr);
+            arguments.add(sb.toString());
+        }
+    }
+
     /**
      * Add Java properties into specified execution arguments list.
      * @param arguments  Target execution arguments list.
      * @param properties Java properties list.
      */
     private static void addProperties(final LinkedList<String> arguments, final LinkedList<Property> properties) {
-        for (Property property: properties) {
+        properties.forEach((property) -> {
             final String name = property.getName();
             final String value = Replace.expand(property.getValue());
             final int len = name.length() + JAVA_PROPERTY_PREFIX.length()
@@ -89,7 +145,7 @@ public class JavaExecutor {
             if (propArg.length() != len) {
                 Logger.log(LogLevel.WARNING, "Java property length calculation error for %s", propArg);
             }
-        }
+        });
     }
 
     /**
@@ -154,7 +210,7 @@ public class JavaExecutor {
      * @param classArgs Java main class arguments list.
     */
     private static void addArguments(final LinkedList<String> arguments, final LinkedList<Argument> classArgs) {
-        for (Argument arg : classArgs) {
+        classArgs.forEach((arg) -> {
             final String name = arg.getName();
             final String value = Replace.expand(arg.getValue());
             final int len = name.length() + CLASS_ARG_PREFIX.length();
@@ -172,8 +228,7 @@ public class JavaExecutor {
             if (argName.length() != len) {
                 Logger.log(LogLevel.WARNING, "Main class argument length calculation error for %s", argName);
             }
-            
-        }
+        });
     }
 
     /**
@@ -202,6 +257,7 @@ public class JavaExecutor {
         if (javaExec != null) {
             args.add(javaExec.getAbsolutePath());
             addOptions(args, LoaderConfig.getJavaOptions());
+            addProxyProperties(args);
             addProperties(args, LoaderConfig.getProperties());
             addClassPath(args, LoaderConfig.getClassPath());
             addMainClass(args, LoaderConfig.getStartupClass());

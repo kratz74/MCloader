@@ -114,6 +114,36 @@ class InitReader extends JsonReader<LoaderInit> {
     }
 
     /**
+     * Process httpProxyHost String.
+     * <p>
+     * {@code "httpProxyHost": "<http_proxy_host_name>"
+     */
+    private void httpProxyHost() throws IOException {
+        next();
+        if (token != JsonToken.VALUE_STRING) {
+            throw new IOException("Expected HTTP proxy host name String value");
+        }
+        String httpProxyHost = parser.getText();
+        data.setHttpProxyHost(httpProxyHost);
+        Logger.log(LogLevel.FINEST, 1, "HTTP proxy host: %s", httpProxyHost);
+    }
+
+    /**
+     * Process httpProxyPort Integer.
+     * <p>
+     * {@code "httpProxyPort": "<http_proxy_port>"
+     */
+    private void httpProxyPort() throws IOException {
+        next();
+        if (token != JsonToken.VALUE_NUMBER_INT) {
+            throw new IOException("Expected HTTP proxy port integer value");
+        }
+        int httpProxyPort = parser.getIntValue();
+        data.setHttpProxyPort(httpProxyPort);
+        Logger.log(LogLevel.FINEST, 1, "HTTP proxy port: %d", httpProxyPort);
+    }
+
+    /**
      * Parses initialization file.
      * @throws java.io.IOException
      */
@@ -141,6 +171,12 @@ class InitReader extends JsonReader<LoaderInit> {
                     }
                     if ("profile".equals(name.toLowerCase())) {
                         profile();
+                    }
+                    if ("httpproxyhost".equals(name.toLowerCase())) {
+                        httpProxyHost();
+                    }
+                    if ("httpproxyport".equals(name.toLowerCase())) {
+                        httpProxyPort();
                     }
                     break;
                 case END_OBJECT:

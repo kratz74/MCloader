@@ -110,8 +110,16 @@ public class Logger {
      * Initialize UI logging. This causes transfer of log output from system output to UI.
      * @param document UI logger document instance.
      */
-    public static void ui(final Document document) {
+    public static void initUi(final Document document) {
         INSTANCE.initUI(document);
+    }
+
+    /**
+     * Close UI logging. This causes transfer of log output from UI back to system output.
+     * @param document UI logger document instance.
+     */
+    public static void closeUi() {
+        INSTANCE.closeUI();
     }
 
     /** Current logging level. */
@@ -130,7 +138,7 @@ public class Logger {
      * Creates an instance of logger.
      */
     private Logger() {
-        level = LogLevel.FINE;
+        level = LogLevel.FINEST;
         indentSize = 2;
         linesBuffer = new LinkedList<>();
         uiBuffer = null;
@@ -141,7 +149,7 @@ public class Logger {
      * @param document UI logger document instance.
      */
     public synchronized void initUI(final Document document) {
-        for (String line : linesBuffer) {
+        linesBuffer.forEach((line) -> {
             try {
                 document.insertString(document.getLength(), line, null);
                 document.insertString(document.getLength(), "\n", null);
@@ -149,9 +157,13 @@ public class Logger {
                 LogEntry lineEntry = new LogEntry("Could not add log line to UI buffer: ", 0, new String[] {e.getLocalizedMessage()});
                 System.out.println(lineEntry.format());
             }
-        }
+        });
         uiBuffer = document;
         linesBuffer = null;
+    }
+
+    public synchronized void closeUI() {
+        uiBuffer = null;
     }
 
     /**
@@ -172,19 +184,22 @@ public class Logger {
 
     /**
      * Log message stored in logging entry.
+     *
      * @param entry Logging entry to be logged.
      */
     private synchronized void log(final LogEntry entry) {
         final String line = entry.format();
-        if (linesBuffer != null) {
-            linesBuffer.add(line);
+        if (uiBuffer == null) {
+            if (linesBuffer != null) {
+                linesBuffer.add(line);
+            }
             System.out.println(entry.format());
         } else {
             try {
                 uiBuffer.insertString(uiBuffer.getLength(), line, null);
                 uiBuffer.insertString(uiBuffer.getLength(), "\n", null);
             } catch (BadLocationException e) {
-                LogEntry lineEntry = new LogEntry("Could not add log line to UI buffer: ", 0, new String[] {e.getLocalizedMessage()});
+                LogEntry lineEntry = new LogEntry("Could not add log line to UI buffer: ", 0, new String[]{e.getLocalizedMessage()});
                 System.out.println(lineEntry.format());
             }
         }

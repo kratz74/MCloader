@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 
 import org.kratz.mc.log.LogLevel;
 import org.kratz.mc.log.Logger;
@@ -64,6 +65,8 @@ public class InitWriter implements Closeable {
         final String userName = LoaderInit.getUserName();
         final String userPassword = LoaderInit.getUserPassword();
         final String profile = LoaderInit.getProfile();
+        final String httpProxyHost = LoaderInit.getHttpProxyHost();
+        final int httpProxyPort = LoaderInit.getHttpProxyPort();
         if (path != null) {
             generator.writeFieldName("path");
             generator.writeString(path);
@@ -79,6 +82,12 @@ public class InitWriter implements Closeable {
         if (profile != null) {
             generator.writeFieldName("profile");
             generator.writeString(profile);
+        }
+        if (httpProxyPort >= 0 && httpProxyHost != null && httpProxyHost.length() > 0) {
+            generator.writeFieldName("httpProxyHost");
+            generator.writeString(httpProxyHost);
+            generator.writeFieldName("httpProxyPort");
+            generator.writeNumber(httpProxyPort);
         }
         generator.writeEndObject();
     }

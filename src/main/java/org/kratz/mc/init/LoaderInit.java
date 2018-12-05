@@ -164,6 +164,41 @@ public class LoaderInit {
     }
 
     /**
+     * Set stored HTTP proxy host.
+     * @return Stored HTTP proxy host.
+     */
+    public static String getHttpProxyHost() {
+        return INIT.httpProxyHost;
+    }
+
+    /**
+     * Update stored HTTP proxy host.
+     * @param host HTTP proxy host to set.
+     */
+    public static void updateHttpProxyHost(final String host) {
+        INIT.setHttpProxyHost(host);
+        INIT.modified = true;
+    }
+
+    /**
+     * Set HTTP proxy port.
+     * @return Stored HTTP proxy port.
+     */
+    public static int getHttpProxyPort() {
+        return INIT.httpProxyPort;
+    }
+
+    /**
+     * Update stored HTTP proxy port.
+     * @param host HTTP proxy port to set.
+     */
+    public static void updateHttpProxyPort(final int port) {
+        INIT.setHttpProxyPort(port);
+        INIT.modified = true;
+    }
+
+    
+    /**
      * Get game directory related to currently selected profile.
      * @return Game directory related to currently selected profile.
      */
@@ -211,6 +246,12 @@ public class LoaderInit {
     /** List of existing game profiles. */
     private LinkedList<Profile> profiles;
 
+    /** Stored HTTP proxy host. */
+    private String httpProxyHost;
+
+    /** Stored HTTP proxy port (negative value means no port is stored). */
+    private int httpProxyPort;
+
     /** Content modification indicator. */
     private boolean modified;
 
@@ -231,6 +272,8 @@ public class LoaderInit {
         this.userPassword = null;
         this.profile = null;
         this.profiles = null;
+        this.httpProxyHost = null;
+        this.httpProxyPort = -1;
         this.modified = false;
     }
 
@@ -273,6 +316,22 @@ public class LoaderInit {
      */
     void setProfiles(final LinkedList<Profile> profiles) {
         this.profiles = profiles;
+    }
+
+    /**
+     * Set HTTP proxy host.
+     * @param host HTTP proxy host to set.
+     */
+    void setHttpProxyHost(final String host) {
+        this.httpProxyHost = host;
+    }
+
+    /**
+     * Set HTTP proxy port.
+     * @param host HTTP proxy port to set.
+     */
+    void setHttpProxyPort(final int port) {
+        this.httpProxyPort = port;
     }
 
 }

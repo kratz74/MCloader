@@ -69,7 +69,7 @@ public class DownloadModules extends AbstractDownload {
             final File targetModule = new File(mod.buildLocalPath(path, modsPath));
             DownloadModule download;
             try {
-                download = new DownloadModule(mod.getUrl(), targetModule, progress);
+                download = new DownloadModule(mod.getUrl(), targetModule, progress, proxy);
             } catch (MalformedURLException ex) {
                 Logger.log(LogLevel.WARNING, "Invalid URL: %s", mod.getFile());
                 download = null;

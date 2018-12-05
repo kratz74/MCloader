@@ -4,6 +4,8 @@
 package org.kratz.mc.utils;
 
 import java.io.File;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.HashMap;
 
 import org.kratz.mc.log.LogLevel;
@@ -26,6 +28,9 @@ public enum OS {
 
     /** Current user home directory. */
     public static final String home = getUserHome();
+
+    /** System HTTP proxy. */
+    public static final Proxy httpProxy = initHTTPProxy();
 
     /** Loader directory name. */
     public static final String loaderDirName = "mcloader";
@@ -69,6 +74,36 @@ public enum OS {
      */
     public static final OS toValue(final String name) {
         return name != null ? valuesMap.get(name.toUpperCase()) : null;
+    }
+
+    /**
+     * Initialize system HTTP proxy settings.
+     * @return System HTTP proxy to be set in OS class variable.
+     */
+    private static Proxy initHTTPProxy() {
+        return OSUtils.systemHTTPProxy();
+    }
+
+    /**
+     * Get system HTTP proxy port.
+     * @return System HTTP proxy port or <code>-1</code> when no proxy port was set.
+     */
+    public static int getHTTPProxyPort() {
+        return
+                httpProxy != null && httpProxy != Proxy.NO_PROXY
+                && (httpProxy.address() instanceof InetSocketAddress)
+                ? ((InetSocketAddress)httpProxy.address()).getPort() : -1;
+    }
+
+    /**
+     * Get system HTTP proxy host.
+     * @return System HTTP proxy host or <code>null</code> when no proxy host was set.
+     */
+    public static String getHTTPProxyHost() {
+        return
+                httpProxy != null && httpProxy != Proxy.NO_PROXY
+                && (httpProxy.address() instanceof InetSocketAddress)
+                ? ((InetSocketAddress)httpProxy.address()).getHostName() : null;
     }
 
     /**

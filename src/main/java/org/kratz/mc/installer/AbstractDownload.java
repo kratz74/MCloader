@@ -70,34 +70,6 @@ public abstract class AbstractDownload implements Downloader, Runnable {
     }
 
     /**
-     * Initialize HTTP PROXY to be used for modules download.
-     * @return New {@link Proxy} instance or {@code null} if no PROXY is set.
-     */
-    public static Proxy systemProxy() {
-        String proxyStr = System.getenv("http_proxy");
-        //String proxyStr = "www-proxy-ukc1.uk.oracle.com:80";
-        if (proxyStr == null) {
-            proxyStr = System.getenv("HTTP_PROXY");
-            
-        }
-        if (proxyStr != null) {
-            try {
-                if (!proxyStr.startsWith("http://")) {
-                    proxyStr = "http://" + proxyStr;
-                }
-                final URL url = new URL(proxyStr);
-                Logger.log(LogLevel.FINE, "HTTP proxy: %s:%d", url.getHost(), url.getPort());
-                return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(url.getHost(), url.getPort()));
-            } catch (MalformedURLException ex) {
-                Logger.log(LogLevel.WARNING, "Invalid URL: %s", proxyStr);
-                return Proxy.NO_PROXY;
-            }
-        }
-        Logger.log(LogLevel.FINE, "No HTTP proxy is set");
-        return Proxy.NO_PROXY;
-    }
-
-    /**
      * Create directory structure for provided path.
      * @param dir Directory structure to be created.
      * @return Value of {@code true} when directory exists or was successfully created or {@code false} otherwise.
