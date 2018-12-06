@@ -32,6 +32,7 @@ public class ModuleDownloadListener implements DownloadListener {
         ui.downloadProgress.setVisible(true);
         ui.downloadLabel.setEnabled(true);
         ui.downloadProgress.setEnabled(true);
+        ui.buttonInstall.setEnabled(false);
     }
 
     /**

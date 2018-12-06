@@ -7,8 +7,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.Proxy;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.Set;
 
 import org.kratz.mc.config.LoaderConfig;
 import org.kratz.mc.log.LogLevel;
@@ -27,6 +29,9 @@ public class DownloadModules extends AbstractDownload {
     /** Modules path under game installation root. */
     private final String modsPath;
 
+    /** Whether to remove unregistered files. */
+    private final boolean rmUnreg;
+
     /** Modules to download. */
     private final LinkedList<LoaderConfig.Mod> mods;
 
@@ -35,14 +40,17 @@ public class DownloadModules extends AbstractDownload {
      * @param path      Game installation path.
      * @param modsPath  Modules path under game installation root.
      * @param mods      Modules to download.
+     * @param rmUnreg   Whether to remove unregistered files.
      * @param progress  Download change listener.
      * @param proxy     HTTP PROXY configuration.
      */
     public DownloadModules(final String path, final String modsPath,
-            final LinkedList<LoaderConfig.Mod> mods, final DownloadListener progress, final Proxy proxy) {
+            final LinkedList<LoaderConfig.Mod> mods, final boolean rmUnreg,
+            final DownloadListener progress, final Proxy proxy) {
         super(path, progress, proxy);
         this.modsPath = modsPath;
         this.mods = mods;
+        this.rmUnreg = rmUnreg;
     }
 
     /** {@inheritDoc} */
@@ -83,7 +91,33 @@ public class DownloadModules extends AbstractDownload {
                 }
             }
             progress.moduleDone(mod);
-
+        }
+        // TODO: Extract to a separate method.
+        if (rmUnreg) {
+            Logger.log(LogLevel.FINE, "Removing unregistered mods");
+            File modsDir = new File(FileUtils.fullPath(path, modsPath));
+            File[] installedMods = modsDir.listFiles();
+            LinkedList<LoaderConfig.Mod> allModsList = LoaderConfig.getMods();
+            if (installedMods != null && installedMods.length > 0) {
+                Set<String> allInstalledMods = new HashSet<>(installedMods.length);
+                for (File file : installedMods) {
+                    Logger.log(LogLevel.FINEST, " - addind mod to all: %s", file.getName());
+                    allInstalledMods.add(file.getName());
+                }
+                for (LoaderConfig.Mod mod : allModsList) {
+                    Logger.log(LogLevel.FINEST, " - already installed: %s", mod.getFile());
+                    allInstalledMods.remove(mod.getFile());
+                }
+                for (String unregistered : allInstalledMods) {
+                    File toDelete = new File(modsDir, unregistered);
+                    if (toDelete.isFile() && toDelete.canWrite()) {
+                        Logger.log(LogLevel.FINE, " - deleting unregistered mod file: %s", unregistered);
+                        toDelete.delete();
+                    } else {
+                        Logger.log(LogLevel.WARNING, " - could not delete unregistered mod file: %s", unregistered);
+                    }
+                }
+            }
         }
         return true;
     }

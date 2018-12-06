@@ -116,7 +116,6 @@ public class Logger {
 
     /**
      * Close UI logging. This causes transfer of log output from UI back to system output.
-     * @param document UI logger document instance.
      */
     public static void closeUi() {
         INSTANCE.closeUI();

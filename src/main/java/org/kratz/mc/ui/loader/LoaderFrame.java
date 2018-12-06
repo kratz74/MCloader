@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import org.kratz.mc.config.LoaderConfig;
 import org.kratz.mc.init.LoaderInit;
 import org.kratz.mc.init.Profile;
@@ -450,41 +452,42 @@ public class LoaderFrame extends javax.swing.JFrame {
 
     /**
      * Generates content of "modules to install" list.
+     * @param document UI list document.
      * @return String containing list of modules to be installed.
      */
-    private String modulesToInstallText() {
+    private void setModulesToInstall(final Document document) throws BadLocationException {
         Logger.log(LogLevel.INFO, "Building modules list for state: %s.", installationState.name());
         switch(installationState) {
             case NO_PROFILE:
-                return "";
+                return;
             case NO_PATH:
-                return "Base game";
+                document.insertString(document.getLength(), " Base game", null);
+                return;
             case INSTALL:
-                return "Base game";
+                document.insertString(document.getLength(), " Base game", null);
+                return;
             case MODULES:
                 if (ctx.isModules()) {
-                    StringBuilder sb = new StringBuilder();
                     boolean first = true;
                     for (LoaderConfig.Mod mod : ctx.modsToFix) {
                         if (first) {
                             first = false;
                         } else {
-                            sb.append('\n');
+                            document.insertString(document.getLength(), "\n", null);
                         }
-                        sb.append(' ');
+                        document.insertString(document.getLength(), " ", null);
                         int from = mod.getFile().lastIndexOf(File.separatorChar);
                         if (from >= 0) {
-                            sb.append(mod.getFile().substring(from + 1));
+                            document.insertString(document.getLength(), mod.getFile().substring(from + 1), null);
                         } else {
-                            sb.append(mod.getFile());
+                            document.insertString(document.getLength(), mod.getFile(), null);
                         }
                     }
-                    return sb.toString();
                 } else {
-                    return "";
+                    return;
                 }
             case OK:
-                return "";
+                return;
             default: throw new IllegalStateException("Unknown game installation state");
         }
     }
@@ -535,6 +538,15 @@ public class LoaderFrame extends javax.swing.JFrame {
         return port <= 65535 ? port : -1;
     }
 
+    private void updateModulesList() {
+        try {
+            final Document modules = downloadModsList.getDocument();
+            modules.remove(0, modules.getLength());
+            setModulesToInstall(modules);
+        } catch (BadLocationException ex) {
+            Logger.log(LogLevel.WARNING, "Error updating modules list: %s", ex.getLocalizedMessage());
+        }
+    }
     /**
      * Initialize {@link Downloader} component depending on current game installation state.
      * @return {@link Downloader} component depending on current game installation state.
@@ -544,12 +556,13 @@ public class LoaderFrame extends javax.swing.JFrame {
             case NO_PATH:
                     if (FileUtils.mkDirs(new File(path.getText()))) {
                         installationState = GameState.gameState(profileExists, pathExists, gameCheckCache, ctx.modsToFix);
-                        downloadModsList.setText(modulesToInstallText());
+                        updateModulesList();
                     }
             case INSTALL: return new DownloadBase(
                     path.getText(), LoaderConfig.getGameUrl(), new BaseDownloadListener(this), getProxy());
             case MODULES: return new DownloadModules(
-                    path.getText(), LoaderConfig.getModsPath(), ctx.modsToFix, new ModuleDownloadListener(this), getProxy());
+                    path.getText(), LoaderConfig.getModsPath(), ctx.modsToFix, delUnreg.isSelected(),
+                    new ModuleDownloadListener(this), getProxy());
             case NO_PROFILE:
             case OK: return null;
             default: throw new IllegalStateException("Unknown game installation state");
@@ -557,7 +570,7 @@ public class LoaderFrame extends javax.swing.JFrame {
     }
 
     final void updateGameComponentsVisibility() {
-        downloadModsList.setText(modulesToInstallText());
+        updateModulesList();
         gameState.setForeground(modulesStatusColor());
         gameState.setText(gameStatusMesage());
         switch (installationState) {
@@ -598,6 +611,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                 profilesBox.setVisible(true);
                 buttonStart.setEnabled(startEnabled());
                 buttonInstall.setEnabled(installEnabled());
+                downloadModsList.setVisible(true);
                 downloadModsList.setEnabled(true);
                 break;
             case MODULES:
@@ -615,6 +629,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                 profilesBox.setVisible(true);
                 buttonStart.setEnabled(startEnabled());
                 buttonInstall.setEnabled(installEnabled());
+                downloadModsList.setVisible(true);
                 downloadModsList.setEnabled(true);
                 break;
             case NO_PATH:
@@ -632,6 +647,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                 profilesBox.setVisible(true);
                 buttonStart.setEnabled(startEnabled());
                 buttonInstall.setEnabled(installEnabled());
+                downloadModsList.setVisible(true);
                 downloadModsList.setEnabled(true);
                 break;
             case OK:
@@ -649,6 +665,7 @@ public class LoaderFrame extends javax.swing.JFrame {
                 profilesBox.setVisible(true);
                 buttonStart.setEnabled(startEnabled());
                 buttonInstall.setEnabled(installEnabled());
+                downloadModsList.setVisible(false);
                 downloadModsList.setEnabled(false);
                 break;
             default:
@@ -714,6 +731,7 @@ public class LoaderFrame extends javax.swing.JFrame {
         proxyPortLabel = new javax.swing.JLabel();
         proxyHost = new javax.swing.JTextField();
         proxyPort = new javax.swing.JTextField();
+        delUnreg = new javax.swing.JCheckBox();
         log = new javax.swing.JPanel();
         logPane = new javax.swing.JScrollPane();
         logText = new javax.swing.JTextPane();
@@ -809,7 +827,6 @@ public class LoaderFrame extends javax.swing.JFrame {
         downloadModsList.setEditable(false);
         downloadModsList.setBackground(new java.awt.Color(238, 238, 238));
         downloadModsList.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
-        downloadModsList.setText(modulesToInstallText());
         downloadModsList.setFocusable(false);
         downloadModsList.setMaximumSize(new java.awt.Dimension(350, 600));
         downloadModsList.setMinimumSize(new java.awt.Dimension(350, 300));
@@ -847,6 +864,9 @@ public class LoaderFrame extends javax.swing.JFrame {
 
         proxyPort.setText(getHTTPProxyPort());
 
+        delUnreg.setSelected(true);
+        delUnreg.setText(Messages.get("ui.checkbox.delete.modules"));
+
         javax.swing.GroupLayout installLayout = new javax.swing.GroupLayout(install);
         install.setLayout(installLayout);
         installLayout.setHorizontalGroup(
@@ -859,7 +879,9 @@ public class LoaderFrame extends javax.swing.JFrame {
                             .addComponent(downloadLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(downloadProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, installLayout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addGap(6, 6, 6)
+                                .addComponent(delUnreg)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(buttonInstall, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(proxyMainLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(installLayout.createSequentialGroup()
@@ -894,7 +916,9 @@ public class LoaderFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(downloadProgress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(buttonInstall)
+                        .addGroup(installLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(buttonInstall)
+                            .addComponent(delUnreg))
                         .addGap(18, 18, 18)
                         .addComponent(proxyMainLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1055,7 +1079,13 @@ public class LoaderFrame extends javax.swing.JFrame {
         gameState.setText(gameStatusMesage());
         buttonStart.setEnabled(startEnabled());
         buttonInstall.setEnabled(installEnabled());
-        downloadModsList.setText(modulesToInstallText());
+        downloadModsList.setVisible(installEnabled());
+        downloadModsList.setEnabled(installEnabled());
+        try {
+            setModulesToInstall(downloadModsList.getDocument());
+        } catch (BadLocationException ex) {
+            Logger.log(LogLevel.WARNING, "Error updating modules list: %s", ex.getLocalizedMessage());
+        }
     }//GEN-LAST:event_checkPathChange
 
     private void checkUserChange(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_checkUserChange
@@ -1129,8 +1159,9 @@ public class LoaderFrame extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     javax.swing.JButton buttonInstall;
     private javax.swing.JButton buttonStart;
+    private javax.swing.JCheckBox delUnreg;
     javax.swing.JLabel downloadLabel;
-    private javax.swing.JTextPane downloadModsList;
+    protected javax.swing.JTextPane downloadModsList;
     javax.swing.JProgressBar downloadProgress;
     private javax.swing.JCheckBox exitCheckBox;
     private javax.swing.JPanel game;
