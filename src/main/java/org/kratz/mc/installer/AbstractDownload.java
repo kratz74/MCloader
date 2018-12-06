@@ -11,11 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
-
+import java.util.LinkedList;
 import org.kratz.mc.log.LogLevel;
 import org.kratz.mc.log.Logger;
 import org.kratz.mc.ui.loader.DownloadListener;
@@ -30,6 +29,12 @@ public abstract class AbstractDownload implements Downloader, Runnable {
 
     /** Temporary extension for file being downloaded. */    
     public static final String TMP_EXT = ".part";
+
+    /** Whether some downloading thread is already running. */
+    private static boolean running = false;
+
+    /** Waiting threads queue. */
+    private static final LinkedList<AbstractDownload> threadQueue = new LinkedList<>();
 
     /**
      * Get remote file size.
@@ -231,6 +236,16 @@ public abstract class AbstractDownload implements Downloader, Runnable {
         final boolean result = thread();
         progress.end(result);
         this.isRunning = false;
+        synchronized(AbstractDownload.class) {
+            if (threadQueue.isEmpty()) {
+                running = false;
+            } else {
+                Logger.log(LogLevel.FINE, "Starting delayed thread %s", this.threadName());
+                AbstractDownload toStart = threadQueue.removeFirst();
+                toStart.thread.start();
+            }
+        }
+        Logger.log(LogLevel.FINE, "Finishing thread %s", this.threadName());
     }
 
     /** 
@@ -238,11 +253,19 @@ public abstract class AbstractDownload implements Downloader, Runnable {
      */
     @Override
     public void start() {
-        //new Exception().printStackTrace();
         this.execute = true;
         this.isRunning = true;
         this.thread = new Thread(this, threadName());
-        this.thread.start();
+        synchronized(AbstractDownload.class) {
+            if (threadQueue.isEmpty() && running == false) {
+                Logger.log(LogLevel.FINE, "Starting thread %s", this.threadName());
+                this.thread.start();
+                running = true;
+            } else {
+                threadQueue.addLast(this);
+            }
+        }
+        
     }
 
     /**

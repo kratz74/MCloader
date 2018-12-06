@@ -288,7 +288,7 @@ public class LoaderFrame extends javax.swing.JFrame {
      * @return Version label value.
      */
     private String versionLabel() {
-        return "Minecraft Launcher " + Version.MAJOR + "." + Version.MINOR + "." + Version.PATCH + ", \u00A9 2017 Tomáš Kraus";
+        return "Minecraft Launcher " + Version.MAJOR + "." + Version.MINOR + "." + Version.PATCH + ", \u00A9 2018 Tomáš Kraus";
     }
 
     /**

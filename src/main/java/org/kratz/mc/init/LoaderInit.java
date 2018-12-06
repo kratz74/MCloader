@@ -190,7 +190,7 @@ public class LoaderInit {
 
     /**
      * Update stored HTTP proxy port.
-     * @param host HTTP proxy port to set.
+     * @param port HTTP proxy port to set.
      */
     public static void updateHttpProxyPort(final int port) {
         INIT.setHttpProxyPort(port);
