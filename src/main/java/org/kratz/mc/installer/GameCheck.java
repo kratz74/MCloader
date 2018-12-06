@@ -4,12 +4,8 @@
 package org.kratz.mc.installer;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.zip.Adler32;
-
 import org.kratz.mc.config.LoaderConfig;
 import org.kratz.mc.log.LogLevel;
 import org.kratz.mc.log.Logger;
@@ -27,22 +23,6 @@ public class GameCheck {
      * Creates a new instance game check.
      */
     public GameCheck() {
-    }
-
-    public static long adler32(final File file, final byte[] extBuff) {
-        final byte[] buff = extBuff != null ? extBuff : new byte[BUFFER_SIZE];
-        final Adler32 ad32 = new Adler32();
-        try (final FileInputStream is = new FileInputStream(file)) {
-            int len;
-            while((len = is.read(buff)) >= 0) {
-                ad32.update(buff, 0, len);
-            }
-        } catch (FileNotFoundException ex) {
-            Logger.log(LogLevel.WARNING, "Could not open %s for reading: %s", file.getName(), ex.getLocalizedMessage());
-        } catch (IOException ex) {
-            Logger.log(LogLevel.WARNING, "Could not read %s file: %s", file.getName(), ex.getLocalizedMessage());
-        }
-        return ad32.getValue();
     }
 
     /**
@@ -63,7 +43,7 @@ public class GameCheck {
             final String filePath = mod.buildLocalPath(path, modsPath);
             final File modFile = new File(filePath);
             if (modFile.isFile() && modFile.canRead()) {
-                final long chkSum = adler32(modFile, buff);
+                final long chkSum = FileUtils.adler32(modFile, buff);
                 final long modChkSum = mod.getChkSum();
                 if (chkSum != modChkSum) {
                     failed.add(mod);

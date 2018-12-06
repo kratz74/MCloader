@@ -4,6 +4,17 @@
 package org.kratz.mc.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
+import java.util.logging.Level;
+import java.util.zip.Adler32;
+
+import org.kratz.mc.log.LogLevel;
+import org.kratz.mc.log.Logger;
 
 /**
  * Various FS utilities.
@@ -94,6 +105,69 @@ public class FileUtils {
         } else {
             return false;
         }
+    }
+
+    /** Internal buffer size. */
+    private static final int BUFFER_SIZE = 0x7FFF;
+
+    /**
+     * Compute Adler32 checksum on given file.
+     * @param file Checksum computing source file.
+     * @param extBuff Use external buffer for reading the file when not <code>null</code>.
+     * @return Adler32 checksum value.
+     */
+    public static long adler32(final File file, final byte[] extBuff) {
+        final byte[] buff = extBuff != null ? extBuff : new byte[BUFFER_SIZE];
+        final Adler32 ad32 = new Adler32();
+        try (final FileInputStream is = new FileInputStream(file)) {
+            int len;
+            while ((len = is.read(buff)) >= 0) {
+                ad32.update(buff, 0, len);
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.log(LogLevel.WARNING, "Could not open %s for reading: %s", file.getName(), ex.getLocalizedMessage());
+        } catch (IOException ex) {
+            Logger.log(LogLevel.WARNING, "Could not read %s file: %s", file.getName(), ex.getLocalizedMessage());
+        }
+        return ad32.getValue();
+    }
+
+    /**
+     * Compute SHA3-256 checksum on given file.
+     * @param file Checksum computing source file.
+     * @param extBuff Use external buffer for reading the file when not <code>null</code>.
+     * @return SHA3-256 checksum value or <code>null</code> if checksum could not be computed.
+     */
+    public static String sha3_256(final File file, final byte[] extBuff) {
+        final byte[] buff = extBuff != null ? extBuff : new byte[BUFFER_SIZE];
+        final MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException ex) {
+             Logger.log(LogLevel.WARNING, "Could not initialize checksum generator for SHA3-256 algorithm");
+             return null;
+        }
+        try (final FileInputStream is = new FileInputStream(file)) {
+            int len;
+            while ((len = is.read(buff)) >= 0) {
+                md.update(buff, 0, len);
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.log(LogLevel.WARNING, "Could not open %s for reading: %s", file.getName(), ex.getLocalizedMessage());
+        } catch (IOException ex) {
+            Logger.log(LogLevel.WARNING, "Could not read %s file: %s", file.getName(), ex.getLocalizedMessage());
+        }
+        byte[] chkSum = md.digest();
+        // Log computed SHA3-256 checksum on given file
+        if (Logger.shouldLog(LogLevel.FINE)) {
+            final StringBuilder sb = new StringBuilder(chkSum.length * 2);
+            final Formatter f = new Formatter(sb);
+            for (byte b : chkSum) {
+                f.format("%02x", b);
+            }
+            Logger.log(LogLevel.FINE, "Checksum %s: %s", file.getName(), sb.toString());
+        }
+        return Base64.getEncoder().encodeToString(chkSum);
     }
 
 }

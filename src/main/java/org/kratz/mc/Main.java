@@ -3,6 +3,7 @@
  */
 package org.kratz.mc;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
@@ -12,6 +13,7 @@ import org.kratz.mc.init.LoaderInit;
 import org.kratz.mc.launcher.JavaExecutor;
 import org.kratz.mc.ui.loader.LoaderFrame;
 import org.kratz.mc.ui.loader.UiContext;
+import org.kratz.mc.utils.FileUtils;
 
 /**
  * Main application class.
@@ -39,6 +41,7 @@ public class Main {
      */
     @SuppressWarnings("SleepWhileInLoop")
     public static void main(String[] args) {
+        System.out.println("ENCODED JAR: " + FileUtils.sha3_256(new File("/data/MCloader/target/launcher-1.2.2-SNAPSHOT.jar"),null));
         Thread.currentThread().setName(THREAD_NAME);
         final UiContext uiCtx = new UiContext();
         /* Create and display the form */
