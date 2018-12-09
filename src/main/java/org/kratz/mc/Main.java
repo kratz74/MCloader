@@ -41,7 +41,7 @@ public class Main {
      */
     @SuppressWarnings("SleepWhileInLoop")
     public static void main(String[] args) {
-        System.out.println("ENCODED JAR: " + FileUtils.sha3_256(new File("/data/MCloader/target/launcher-1.2.2-SNAPSHOT.jar"),null));
+        //System.out.println("ENCODED JAR: " + FileUtils.sha3_256(new File("/data/MCloader/target/launcher-1.2.2-SNAPSHOT.jar"),null));
         Thread.currentThread().setName(THREAD_NAME);
         final UiContext uiCtx = new UiContext();
         /* Create and display the form */
