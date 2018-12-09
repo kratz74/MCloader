@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.kratz.mc</groupId>
     <artifactId>launcher</artifactId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.2</version>
     <name>Minecraft Launcher</name>
 
     <properties>

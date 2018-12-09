@@ -137,7 +137,7 @@ public class Logger {
      * Creates an instance of logger.
      */
     private Logger() {
-        level = LogLevel.FINEST;
+        level = LogLevel.INFO;
         indentSize = 2;
         linesBuffer = new LinkedList<>();
         uiBuffer = null;
