@@ -2,3 +2,5 @@
 /target/
 /build/
 /nbproject/private/
+/loader/target/
+/app/target/
