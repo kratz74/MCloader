@@ -1,13 +1,13 @@
 /*
- * (C) 2016 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
 package org.kratz.mc.launcher;
 
 import java.io.File;
 import java.io.FileFilter;
 
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 import org.kratz.mc.utils.OS;
 
 /**

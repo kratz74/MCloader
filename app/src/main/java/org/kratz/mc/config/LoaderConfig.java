@@ -5,8 +5,8 @@ package org.kratz.mc.config;
 
 import java.util.LinkedList;
 
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 import org.kratz.mc.utils.FileUtils;
 
 /**

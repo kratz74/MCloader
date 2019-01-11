@@ -1,7 +1,7 @@
 /*
- * (C) 2016 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
-package org.kratz.mc.log;
+package org.kratz.mc.common.log;
 
 import java.util.Formatter;
 

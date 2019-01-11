@@ -1,5 +1,5 @@
 /*
- * (C) 2016 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
 package org.kratz.mc.installer;
 
@@ -12,11 +12,13 @@ import java.net.Proxy;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
+import org.kratz.mc.common.http.HttpDownload;
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 import org.kratz.mc.ui.loader.DownloadListener;
 import org.kratz.mc.utils.FileUtils;
+import static org.kratz.mc.common.http.HttpDownload.BUFFER_SIZE;
+import static org.kratz.mc.common.http.HttpDownload.TMP_EXT;
 
 /**
  * Download game base file and extract it.
@@ -59,7 +61,7 @@ public class DownloadBase extends AbstractDownload {
             return false;
         }
         progress.name("Game basic files");
-        long size = AbstractDownload.getContentLength(gameUrl, proxy);
+        long size = HttpDownload.getContentLength(gameUrl, proxy);
         if (size < 0) {
             size = 1;
         }
@@ -67,7 +69,7 @@ public class DownloadBase extends AbstractDownload {
         ZipInputStream in = null;
         try {
             final byte[] buff = new byte[BUFFER_SIZE];
-            in = new ZipInputStream(openConnection(gameUrl, proxy));
+            in = new ZipInputStream(HttpDownload.openConnection(gameUrl, proxy));
             long transfered = 0;
             ZipEntry entry;
             while((entry = in.getNextEntry()) != null) {
@@ -99,7 +101,7 @@ public class DownloadBase extends AbstractDownload {
                         transferOk = false;
                         Logger.log(LogLevel.WARNING, 0, "Could not write %s: %s", tmpPath, ioe.getLocalizedMessage());                        
                     } finally {
-                        AbstractDownload.close(out);
+                        HttpDownload.closeConnection(out);
                     }
                     if (transferOk) {
                         tmpPath.renameTo(fullPath);
@@ -117,7 +119,7 @@ public class DownloadBase extends AbstractDownload {
         } catch (IOException ex) {
             Logger.log(LogLevel.WARNING, "Error downloading %s: ", gameUrlStr);
         } finally {
-            AbstractDownload.close(in);
+            HttpDownload.closeConnection(in);
         }
         return true;
     }

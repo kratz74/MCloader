@@ -1,5 +1,5 @@
 /*
- * (C) 2016 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
 package org.kratz.mc.json;
 
@@ -12,8 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 
 /**
  * Abstract JSON reader.

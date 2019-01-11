@@ -1,5 +1,5 @@
 /*
- * (C) 2016 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
 package org.kratz.mc.ui.loader;
 
@@ -26,8 +26,8 @@ import org.kratz.mc.installer.DownloadProfiles;
 import org.kratz.mc.installer.Downloader;
 import org.kratz.mc.installer.GameCheck;
 import org.kratz.mc.locale.Messages;
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 import org.kratz.mc.utils.FileUtils;
 import org.kratz.mc.utils.OS;
 import org.kratz.mc.utils.OSUtils;

@@ -18,10 +18,14 @@
 
     <properties>
         <mainClass>org.kratz.mc.Main</mainClass>
-        <lib.dir>${project.basedir}/lib</lib.dir>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.kratz.mc</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>

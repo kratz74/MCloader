@@ -1,5 +1,5 @@
 /*
- * (C) 2016 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
 package org.kratz.mc.installer;
 
@@ -11,10 +11,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Set;
-
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 import org.kratz.mc.config.LoaderConfig;
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
 import org.kratz.mc.ui.loader.DownloadListener;
 import org.kratz.mc.utils.FileUtils;
 

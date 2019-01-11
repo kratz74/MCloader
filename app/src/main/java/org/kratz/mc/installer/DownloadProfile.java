@@ -1,14 +1,13 @@
 /*
- * (C) 2017 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
 package org.kratz.mc.installer;
 
 import java.io.File;
 import java.net.Proxy;
 import java.net.URL;
-
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 import org.kratz.mc.ui.loader.DownloadListener;
 
 /**

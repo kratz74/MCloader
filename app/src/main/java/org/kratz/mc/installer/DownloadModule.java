@@ -1,5 +1,5 @@
 /*
- * (C) 2016 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
 package org.kratz.mc.installer;
 
@@ -8,25 +8,17 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
-
+import org.kratz.mc.common.http.HTTPDownloadListener;
+import org.kratz.mc.common.http.HttpDownload;
 import org.kratz.mc.ui.loader.DownloadListener;
 
 /**
  * Downloads game module.
  */
-public class DownloadModule {
-
-    /** Source URL. */
-    private final URL source;
-
-    /** Target file. */
-    private final File target;
+public class DownloadModule extends HttpDownload {
 
     /** Download progress event listener. */
     private final DownloadListener progress;
-
-    /** HTTP proxy configuration. */
-    private final Proxy proxy;
 
     /**
      * Creates an instance of game module download handler.
@@ -38,10 +30,8 @@ public class DownloadModule {
      */
     public DownloadModule(final String source, final File target, final DownloadListener progress, final Proxy proxy)
             throws MalformedURLException {
-        this.source = new URL(source);
-        this.target = target;
+        super(new URL(source), target, new HTTPProgressOnlyListener(progress), proxy);
         this.progress = progress;
-        this.proxy = proxy;
     }
 
     /**
@@ -52,7 +42,8 @@ public class DownloadModule {
         if (!AbstractDownload.mkParentDir(target)) {
             return;
         }
-        AbstractDownload.transfer(source, target, progress, proxy);
+        progress.name(target.getName());
+        transfer();
     }
 
 }

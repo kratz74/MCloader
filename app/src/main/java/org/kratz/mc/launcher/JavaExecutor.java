@@ -1,5 +1,5 @@
 /*
- * (C) 2016 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
 package org.kratz.mc.launcher;
 
@@ -11,8 +11,8 @@ import org.kratz.mc.config.Argument;
 import org.kratz.mc.config.LoaderConfig;
 import org.kratz.mc.config.Property;
 import org.kratz.mc.init.LoaderInit;
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 
 /**
  * Executes Java VM.

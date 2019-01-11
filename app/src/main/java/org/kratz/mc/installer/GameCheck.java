@@ -1,5 +1,5 @@
 /*
- * (C) 2016 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
 package org.kratz.mc.installer;
 
@@ -7,8 +7,8 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.zip.Adler32;
 import org.kratz.mc.config.LoaderConfig;
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 import org.kratz.mc.utils.FileUtils;
 
 /**

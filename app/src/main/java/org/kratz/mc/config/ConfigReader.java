@@ -10,8 +10,8 @@ import java.io.IOException;
 
 import org.kratz.mc.init.LoaderInit;
 import org.kratz.mc.json.JsonReader;
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 
 /**
  * Reads loader configuration file.

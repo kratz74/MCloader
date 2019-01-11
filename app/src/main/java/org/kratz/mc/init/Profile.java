@@ -1,5 +1,5 @@
 /*
- * (C) 2017 Tomas Kraus
+ * (C) 2019 Tomas Kraus
  */
 package org.kratz.mc.init;
 

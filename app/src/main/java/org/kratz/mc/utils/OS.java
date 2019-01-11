@@ -8,8 +8,8 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.HashMap;
 
-import org.kratz.mc.log.LogLevel;
-import org.kratz.mc.log.Logger;
+import org.kratz.mc.common.log.LogLevel;
+import org.kratz.mc.common.log.Logger;
 
 /**
  * Operating system type.
