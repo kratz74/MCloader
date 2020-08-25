@@ -216,6 +216,20 @@ public class LoaderFrame extends javax.swing.JFrame {
     /** Content of profiles select box. */
     Profile[] profilesContent;
 
+    /**
+     * Check and download profiles list when needed.
+     */
+    private void updateProfilesList() {
+        File profiles = new File(LoaderInit.PROFILES_PATH);
+        if (!profiles.exists() || (System.currentTimeMillis() - profiles.lastModified()) > 86400000L) {
+
+            Downloader downloader = new DownloadProfiles(
+                    LoaderInit.PROFILES_PATH, LoaderInit.PROFILES_URL,
+                    new ProfilesDownloadListener(this), OSUtils.customHTTPProxy(getHTTPProxyHost(), getHTTPProxyPortNum()));
+            downloader.start();
+        }
+    }
+
     private Profile[] buildProfilesContent() {
         LinkedList<Profile> profiles = LoaderInit.getProfiles();
         return profiles != null ? profiles.toArray(new Profile[profiles.size()]) : new Profile[0];
@@ -570,6 +584,7 @@ public class LoaderFrame extends javax.swing.JFrame {
     }
 
     final void updateGameComponentsVisibility() {
+        updateProfilesList();
         updateModulesList();
         gameState.setForeground(modulesStatusColor());
         gameState.setText(gameStatusMesage());
@@ -591,9 +606,6 @@ public class LoaderFrame extends javax.swing.JFrame {
                 profilesBox.setVisible(profileBoxEnabled);
                 buttonStart.setEnabled(false);
                 buttonInstall.setEnabled(false);
-                profileDownloader = new DownloadProfiles(
-                        LoaderInit.PROFILES_PATH, LoaderInit.PROFILES_URL, new ProfilesDownloadListener(this), null);
-                profileDownloader.start();
                 downloadModsList.setEnabled(false);
                 break;
             case INSTALL:
